@@ -80,6 +80,15 @@ type (
 		X int `env:"x"`
 		Y int `env:"y"`
 	}
+
+	BasicConfig struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+
+	ParentConfig struct {
+		BasicConfig
+	}
 )
 
 func (c *TestPostLoadConfig) PostLoad() error {
