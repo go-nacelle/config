@@ -29,12 +29,8 @@ func (s *LoggingConfigSuite) TestLoadLogs(t sweet.T) {
 	Expect(logger.PrintfFuncCallCount()).To(Equal(1))
 
 	params := logger.PrintfFuncCallParams()[0]
-	Expect(params.Arg0).To(Equal("Config loaded from environment: %#v"))
-	Expect(params.Arg1[0]).To(Equal(map[string]interface{}{
-		"X": "foo",
-		"Y": "123",
-		"Q": `["bar","baz","bonk"]`,
-	}))
+	Expect(params.Arg0).To(Equal("Config loaded from environment: %s"))
+	Expect(params.Arg1[0]).To(Equal(`Q=["bar","baz","bonk"], X=foo, Y=123`))
 }
 
 func (s *LoggingConfigSuite) TestMask(t sweet.T) {
@@ -56,10 +52,8 @@ func (s *LoggingConfigSuite) TestMask(t sweet.T) {
 	Expect(logger.PrintfFuncCallCount()).To(Equal(1))
 
 	params := logger.PrintfFuncCallParams()[0]
-	Expect(params.Arg0).To(Equal("Config loaded from environment: %#v"))
-	Expect(params.Arg1[0]).To(Equal(map[string]interface{}{
-		"X": "foo",
-	}))
+	Expect(params.Arg0).To(Equal("Config loaded from environment: %s"))
+	Expect(params.Arg1[0]).To(Equal("X=foo"))
 }
 
 func (s *LoggingConfigSuite) TestBadMaskTag(t sweet.T) {

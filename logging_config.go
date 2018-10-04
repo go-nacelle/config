@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -45,7 +47,13 @@ func (c *LoggingConfig) Load(target interface{}, modifiers ...TagModifier) error
 		return fmt.Errorf("failed to serialize config (%s)", err.Error())
 	}
 
-	c.logger.Printf("Config loaded from environment: %#v", m)
+	values := []string{}
+	for key, value := range m {
+		values = append(values, fmt.Sprintf("%s=%v", key, value))
+	}
+
+	sort.Strings(values)
+	c.logger.Printf("Config loaded from environment: %s", strings.Join(values, ", "))
 	return nil
 }
 
