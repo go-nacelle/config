@@ -148,7 +148,7 @@ func (c *config) loadEnvField(
 		return err
 	}
 
-	if flag == FlagSkip {
+	if flag == FlagSkip && requiredTag == "" && defaultTag == "" {
 		return nil
 	}
 
@@ -180,14 +180,6 @@ func (c *config) loadEnvField(
 	}
 
 	if defaultTag != "" {
-		if !fieldValue.IsValid() {
-			return fmt.Errorf("field '%s' is invalid", name)
-		}
-
-		if !fieldValue.CanSet() {
-			return fmt.Errorf("field '%s' can not be set", name)
-		}
-
 		if !toJSON([]byte(defaultTag), fieldValue.Addr().Interface()) {
 			return fmt.Errorf("default value for field '%s' cannot be coerced into the expected type", name)
 		}
