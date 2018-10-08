@@ -31,20 +31,23 @@ func TestMain(m *testing.M) {
 //
 
 func ensureEquals(sourcer Sourcer, values []string, expected string) {
-	val, _, ok := sourcer.Get(values)
-	Expect(ok).To(BeTrue())
+	val, flag, err := sourcer.Get(values)
+	Expect(err).To(BeNil())
+	Expect(flag).To(Equal(FlagFound))
 	Expect(val).To(Equal(expected))
 }
 
 func ensureMatches(sourcer Sourcer, values []string, expected string) {
-	val, _, ok := sourcer.Get(values)
-	Expect(ok).To(BeTrue())
+	val, flag, err := sourcer.Get(values)
+	Expect(err).To(BeNil())
+	Expect(flag).To(Equal(FlagFound))
 	Expect(val).To(MatchJSON(expected))
 }
 
 func ensureMissing(sourcer Sourcer, values []string) {
-	_, _, ok := sourcer.Get(values)
-	Expect(ok).To(BeFalse())
+	_, flag, err := sourcer.Get(values)
+	Expect(err).To(BeNil())
+	Expect(flag).To(Equal(FlagMissing))
 }
 
 func gatherTags(obj interface{}, name string) map[string]string {

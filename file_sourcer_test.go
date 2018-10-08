@@ -1,51 +1,37 @@
 package zubrin
 
-import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
-)
+import "github.com/aphistic/sweet"
 
 type FileSourcerSuite struct{}
 
 func (s *FileSourcerSuite) TestLoadJSON(t sweet.T) {
-	sourcer, err := NewFileSourcer("test-files/values.json", ParseYAML)
-	Expect(err).To(BeNil())
-	testFileSourcer(sourcer)
+	testFileSourcer(NewFileSourcer("test-files/values.json", ParseYAML))
 }
 
 func (s *FileSourcerSuite) TestLoadJSONNoParser(t sweet.T) {
-	sourcer, err := NewFileSourcer("test-files/values.json", nil)
-	Expect(err).To(BeNil())
-	testFileSourcer(sourcer)
+	testFileSourcer(NewFileSourcer("test-files/values.json", nil))
 }
 
 func (s *FileSourcerSuite) TestLoadYAML(t sweet.T) {
-	sourcer, err := NewFileSourcer("test-files/values.yaml", ParseYAML)
-	Expect(err).To(BeNil())
-	testFileSourcer(sourcer)
+	testFileSourcer(NewFileSourcer("test-files/values.yaml", ParseYAML))
 }
 func (s *FileSourcerSuite) TestLoadYAMLNoParser(t sweet.T) {
-	sourcer, err := NewFileSourcer("test-files/values.yaml", nil)
-	Expect(err).To(BeNil())
-	testFileSourcer(sourcer)
+	testFileSourcer(NewFileSourcer("test-files/values.yaml", nil))
 }
 
 func (s *FileSourcerSuite) TestLoadTOML(t sweet.T) {
-	sourcer, err := NewFileSourcer("test-files/values.toml", ParseTOML)
-	Expect(err).To(BeNil())
-	testFileSourcer(sourcer)
+	testFileSourcer(NewFileSourcer("test-files/values.toml", ParseTOML))
 }
 
 func (s *FileSourcerSuite) TestLoadTOMLNoParser(t sweet.T) {
-	sourcer, err := NewFileSourcer("test-files/values.toml", nil)
-	Expect(err).To(BeNil())
-	testFileSourcer(sourcer)
+	testFileSourcer(NewFileSourcer("test-files/values.toml", nil))
 }
 
 func (s *FileSourcerSuite) TestOptionalFileSourcer(t sweet.T) {
-	sourcer, err := NewOptionalFileSourcer("test-files/no-such-file.json", nil)
-	Expect(err).To(BeNil())
-	ensureMissing(sourcer, []string{"foo"})
+	ensureMissing(
+		NewOptionalFileSourcer("test-files/no-such-file.json", nil),
+		[]string{"foo"},
+	)
 }
 
 func testFileSourcer(sourcer Sourcer) {

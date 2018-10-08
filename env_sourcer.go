@@ -35,9 +35,9 @@ func (s *envSourcer) Tags() []string {
 	return []string{"env"}
 }
 
-func (s *envSourcer) Get(values []string) (string, bool, bool) {
+func (s *envSourcer) Get(values []string) (string, SourcerFlag, error) {
 	if values[0] == "" {
-		return "", true, false
+		return "", FlagSkip, nil
 	}
 
 	envvars := []string{
@@ -47,9 +47,9 @@ func (s *envSourcer) Get(values []string) (string, bool, bool) {
 
 	for _, envvar := range envvars {
 		if val, ok := os.LookupEnv(envvar); ok {
-			return val, false, true
+			return val, FlagFound, nil
 		}
 	}
 
-	return "", false, false
+	return "", FlagMissing, nil
 }

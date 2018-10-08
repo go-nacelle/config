@@ -7,7 +7,7 @@ package zubrin
 import "sync"
 
 type MockSourcer struct {
-	GetFunc  func([]string) (string, bool, bool)
+	GetFunc  func([]string) (string, SourcerFlag, error)
 	histGet  []SourcerGetParamSet
 	TagsFunc func() []string
 	histTags []SourcerTagsParamSet
@@ -24,7 +24,7 @@ func NewMockSourcer() *MockSourcer {
 	m.TagsFunc = m.defaultTagsFunc
 	return m
 }
-func (m *MockSourcer) Get(v0 []string) (string, bool, bool) {
+func (m *MockSourcer) Get(v0 []string) (string, SourcerFlag, error) {
 	m.mutex.Lock()
 	m.histGet = append(m.histGet, SourcerGetParamSet{v0})
 	m.mutex.Unlock()
@@ -58,8 +58,8 @@ func (m *MockSourcer) TagsFuncCallParams() []SourcerTagsParamSet {
 	return m.histTags
 }
 
-func (m *MockSourcer) defaultGetFunc(v0 []string) (string, bool, bool) {
-	return "", false, false
+func (m *MockSourcer) defaultGetFunc(v0 []string) (string, SourcerFlag, error) {
+	return "", 0, nil
 }
 func (m *MockSourcer) defaultTagsFunc() []string {
 	return nil

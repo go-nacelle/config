@@ -143,8 +143,12 @@ func (c *config) loadEnvField(
 	defaultTag string,
 	requiredTag string,
 ) error {
-	val, skip, ok := c.sourcer.Get(tagValues)
-	if skip {
+	val, flag, err := c.sourcer.Get(tagValues)
+	if err != nil {
+		return err
+	}
+
+	if flag == FlagSkip {
 		return nil
 	}
 
@@ -156,7 +160,7 @@ func (c *config) loadEnvField(
 		return fmt.Errorf("field '%s' can not be set", name)
 	}
 
-	if ok {
+	if flag == FlagFound {
 		if !toJSON([]byte(val), fieldValue.Addr().Interface()) {
 			return fmt.Errorf("value supplied for field '%s' cannot be coerced into the expected type", name)
 		}

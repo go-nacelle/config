@@ -35,7 +35,7 @@ func (s *multiSourcer) Tags() []string {
 	return s.tags
 }
 
-func (s *multiSourcer) Get(values []string) (string, bool, bool) {
+func (s *multiSourcer) Get(values []string) (string, SourcerFlag, error) {
 	correlation := map[string]string{}
 	for i, value := range values {
 		correlation[s.tags[i]] = value
@@ -50,13 +50,21 @@ func (s *multiSourcer) Get(values []string) (string, bool, bool) {
 			sourcerValues = append(sourcerValues, correlation[tag])
 		}
 
-		val, sourcerSkip, ok := sourcer.Get(sourcerValues)
-		if ok {
-			return val, false, true
+		val, flag, err := sourcer.Get(sourcerValues)
+		if err != nil {
+			return "", FlagMissing, err
 		}
 
-		skip = skip && sourcerSkip
+		if flag == FlagFound {
+			return val, FlagFound, nil
+		}
+
+		skip = skip && flag == FlagSkip
 	}
 
-	return "", skip, false
+	if skip {
+		return "", FlagSkip, nil
+	}
+
+	return "", FlagMissing, nil
 }

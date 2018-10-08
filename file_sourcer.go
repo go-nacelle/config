@@ -15,6 +15,7 @@ import (
 type (
 	fileSourcer struct {
 		values map[string]string
+		err    error
 	}
 
 	FileParser func(content []byte) (map[string]interface{}, error)
@@ -29,10 +30,9 @@ var parserMap = map[string]FileParser{
 
 // NewOptionalFileSourcer create a file sourcer if the provided file exists. If
 // the provided file is not found, a sourcer is returned returns no values.
-func NewOptionalFileSourcer(filename string, parser FileParser) (Sourcer, error) {
-	_, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return &fileSourcer{values: map[string]string{}}, nil
+func NewOptionalFileSourcer(filename string, parser FileParser) Sourcer {
+	if _, err := os.Stat(filename); err != nil && os.IsNotExist(err) {
+		return &fileSourcer{values: map[string]string{}}
 	}
 
 	return NewFileSourcer(filename, parser)
@@ -43,53 +43,42 @@ func NewOptionalFileSourcer(filename string, parser FileParser) (Sourcer, error)
 // an encoding of a map from string keys to JSON-serializable values. If a nil
 // parser is supplied, one will be selected based on the extension of the file.
 // JSON, YAML, and TOML files are supported.
-func NewFileSourcer(filename string, parser FileParser) (Sourcer, error) {
-	content, err := ioutil.ReadFile(filename)
+func NewFileSourcer(filename string, parser FileParser) Sourcer {
+	values, err := readFile(filename, parser)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file '%s' (%s)", filename, err.Error())
+		return &fileSourcer{err: err}
 	}
 
-	parser, err = chooseParser(filename, parser)
+	jsonValues, err := serializeJSONValues(values)
 	if err != nil {
-		return nil, err
+		return &fileSourcer{err: err}
 	}
 
-	values, err := parser(content)
-	if err != nil {
-		return nil, err
-	}
-
-	jsonValues := map[string]string{}
-	for key, value := range values {
-		serialized, err := serializeJSONValue(value)
-		if err != nil {
-			return nil, fmt.Errorf("illegal configuration value for '%s' (%s)", key, err.Error())
-		}
-
-		jsonValues[key] = serialized
-	}
-
-	return &fileSourcer{values: jsonValues}, nil
+	return &fileSourcer{values: jsonValues}
 }
 
 func (s *fileSourcer) Tags() []string {
 	return []string{"file"}
 }
 
-func (s *fileSourcer) Get(values []string) (string, bool, bool) {
+func (s *fileSourcer) Get(values []string) (string, SourcerFlag, error) {
+	if s.err != nil {
+		return "", FlagUnknown, s.err
+	}
+
 	if values[0] == "" {
-		return "", true, false
+		return "", FlagSkip, nil
 	}
 
 	segments := strings.Split(values[0], ".")
 
 	if val, ok := s.values[segments[0]]; ok {
 		if val, ok := extractJSONPath(val, segments[1:]); ok {
-			return val, false, true
+			return val, FlagFound, nil
 		}
 	}
 
-	return "", false, false
+	return "", FlagMissing, nil
 }
 
 //
@@ -117,17 +106,31 @@ func commonParser(content []byte, unmarshaller func([]byte, interface{}) error) 
 }
 
 // NewYAMLFileSourcer creates a file sourcer that parses conent as YAML.
-func NewYAMLFileSourcer(filename string) (Sourcer, error) {
+func NewYAMLFileSourcer(filename string) Sourcer {
 	return NewFileSourcer(filename, ParseYAML)
 }
 
 // NewTOMLFileSourcer creates a file sourcer that parses conent as TOML.
-func NewTOMLFileSourcer(filename string) (Sourcer, error) {
+func NewTOMLFileSourcer(filename string) Sourcer {
 	return NewFileSourcer(filename, ParseTOML)
 }
 
 //
 // Helpers
+
+func readFile(filename string, parser FileParser) (map[string]interface{}, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file '%s' (%s)", filename, err.Error())
+	}
+
+	parser, err = chooseParser(filename, parser)
+	if err != nil {
+		return nil, err
+	}
+
+	return parser(content)
+}
 
 func chooseParser(filename string, parser FileParser) (FileParser, error) {
 	if parser != nil {
@@ -139,6 +142,20 @@ func chooseParser(filename string, parser FileParser) (FileParser, error) {
 	}
 
 	return nil, fmt.Errorf("failed to determine parser for file %s", filename)
+}
+
+func serializeJSONValues(values map[string]interface{}) (map[string]string, error) {
+	jsonValues := map[string]string{}
+	for key, value := range values {
+		serialized, err := serializeJSONValue(value)
+		if err != nil {
+			return nil, fmt.Errorf("illegal configuration value for '%s' (%s)", key, err.Error())
+		}
+
+		jsonValues[key] = serialized
+	}
+
+	return jsonValues, nil
 }
 
 func serializeJSONValue(value interface{}) (string, error) {

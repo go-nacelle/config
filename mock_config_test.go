@@ -4,9 +4,7 @@
 
 package zubrin
 
-import (
-	"sync"
-)
+import "sync"
 
 type MockConfig struct {
 	LoadFunc     func(interface{}, ...TagModifier) error
