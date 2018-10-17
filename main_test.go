@@ -18,6 +18,7 @@ func TestMain(m *testing.M) {
 
 		s.AddSuite(&ConfigSuite{})
 		s.AddSuite(&DefaultTagSetterSuite{})
+		s.AddSuite(&DirectorySourcerSuite{})
 		s.AddSuite(&EnvSourcerSuite{})
 		s.AddSuite(&EnvTagPrefixerSuite{})
 		s.AddSuite(&FileSourcerSuite{})
