@@ -2,11 +2,22 @@ package zubrin
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
 type directorySourcer struct {
 	err error
+}
+
+// NewOptionalDirectorySourcer creates a directory sourcer if the provided directoy
+// exists. the provided file is not found, a sourcer is returned returns no values.
+func NewOptionalDirectorySourcer(dirname string, parser FileParser) Sourcer {
+	if _, err := os.Stat(dirname); err != nil && os.IsNotExist(err) {
+		return &fileSourcer{values: map[string]string{}}
+	}
+
+	return NewDirectorySourcer(dirname, parser)
 }
 
 // NewDirectorySourcer creates a sourcer that reads files from a directory. For

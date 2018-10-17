@@ -18,3 +18,10 @@ func (s *DirectorySourcerSuite) TestLoadJSON(t sweet.T) {
 	ensureEquals(sourcer, []string{"y"}, "8")
 	ensureEquals(sourcer, []string{"z"}, "9")
 }
+
+func (s *DirectorySourcerSuite) TestOptionalDirectorySourcer(t sweet.T) {
+	ensureMissing(
+		NewOptionalFileSourcer("test-files/no-such-directory", nil),
+		[]string{"foo"},
+	)
+}

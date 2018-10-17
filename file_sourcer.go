@@ -28,7 +28,7 @@ var parserMap = map[string]FileParser{
 	".toml": ParseTOML,
 }
 
-// NewOptionalFileSourcer create a file sourcer if the provided file exists. If
+// NewOptionalFileSourcer creates a file sourcer if the provided file exists. If
 // the provided file is not found, a sourcer is returned returns no values.
 func NewOptionalFileSourcer(filename string, parser FileParser) Sourcer {
 	if _, err := os.Stat(filename); err != nil && os.IsNotExist(err) {
