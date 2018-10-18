@@ -15,7 +15,6 @@ import (
 type (
 	fileSourcer struct {
 		values map[string]string
-		err    error
 	}
 
 	FileParser func(content []byte) (map[string]interface{}, error)
@@ -46,12 +45,12 @@ func NewOptionalFileSourcer(filename string, parser FileParser) Sourcer {
 func NewFileSourcer(filename string, parser FileParser) Sourcer {
 	values, err := readFile(filename, parser)
 	if err != nil {
-		return &fileSourcer{err: err}
+		return newErrorSourcer(err)
 	}
 
 	jsonValues, err := serializeJSONValues(values)
 	if err != nil {
-		return &fileSourcer{err: err}
+		return newErrorSourcer(err)
 	}
 
 	return &fileSourcer{values: jsonValues}
@@ -62,10 +61,6 @@ func (s *fileSourcer) Tags() []string {
 }
 
 func (s *fileSourcer) Get(values []string) (string, SourcerFlag, error) {
-	if s.err != nil {
-		return "", FlagUnknown, s.err
-	}
-
 	if values[0] == "" {
 		return "", FlagSkip, nil
 	}

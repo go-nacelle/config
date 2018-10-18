@@ -6,10 +6,6 @@ import (
 	"path/filepath"
 )
 
-type directorySourcer struct {
-	err error
-}
-
 // NewOptionalDirectorySourcer creates a directory sourcer if the provided directoy
 // exists. the provided file is not found, a sourcer is returned returns no values.
 func NewOptionalDirectorySourcer(dirname string, parser FileParser) Sourcer {
@@ -22,16 +18,21 @@ func NewOptionalDirectorySourcer(dirname string, parser FileParser) Sourcer {
 
 // NewDirectorySourcer creates a sourcer that reads files from a directory. For
 // details on parsing format, refer to NewFileParser. Each file in a directory
-// is read in alphabetical order. The directory is assumed to have only files
-// and each file must be parseable by the given FileParser.
+// is read in alphabetical order. Nested directories are ignored when reading
+// direcotry content, and each found regular file is assumed to be parseable by
+// the given FileParser.
 func NewDirectorySourcer(dirname string, parser FileParser) Sourcer {
 	entries, err := ioutil.ReadDir(dirname)
 	if err != nil {
-		return &fileSourcer{err: err}
+		return newErrorSourcer(err)
 	}
 
 	sourcers := []Sourcer{}
 	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
 		sourcers = append(sourcers, NewFileSourcer(filepath.Join(dirname, entry.Name()), parser))
 	}
 

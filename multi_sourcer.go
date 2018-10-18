@@ -1,6 +1,8 @@
 package zubrin
 
-import "sort"
+import (
+	"sort"
+)
 
 type multiSourcer struct {
 	sourcers []Sourcer

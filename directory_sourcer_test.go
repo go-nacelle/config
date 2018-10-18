@@ -1,8 +1,6 @@
 package zubrin
 
-import (
-	"github.com/aphistic/sweet"
-)
+import "github.com/aphistic/sweet"
 
 type DirectorySourcerSuite struct{}
 
