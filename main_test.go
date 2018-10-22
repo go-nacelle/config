@@ -22,6 +22,7 @@ func TestMain(m *testing.M) {
 		s.AddSuite(&EnvSourcerSuite{})
 		s.AddSuite(&EnvTagPrefixerSuite{})
 		s.AddSuite(&FileSourcerSuite{})
+		s.AddSuite(&FileTagPrefixerSuite{})
 		s.AddSuite(&GlobSourcerSuite{})
 		s.AddSuite(&JSONSuite{})
 		s.AddSuite(&LoggingConfigSuite{})

@@ -40,7 +40,6 @@ type (
 )
 
 const (
-	envTag      = "env"
 	defaultTag  = "default"
 	requiredTag = "required"
 )

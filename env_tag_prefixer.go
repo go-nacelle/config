@@ -23,13 +23,13 @@ func NewEnvTagPrefixer(prefix string) TagModifier {
 
 // AlterFieldTag adds the env prefixer's prefix to the `env` tag value, if one is set.
 func (p *EnvTagPrefixer) AlterFieldTag(fieldType reflect.StructField, tags *structtag.Tags) error {
-	tag, err := tags.Get(envTag)
+	tag, err := tags.Get("env")
 	if err != nil {
 		return nil
 	}
 
 	return tags.Set(&structtag.Tag{
-		Key:  envTag,
+		Key:  "env",
 		Name: fmt.Sprintf("%s_%s", p.prefix, tag.Name),
 	})
 }
