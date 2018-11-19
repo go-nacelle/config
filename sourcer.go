@@ -9,6 +9,8 @@ var (
 	NewGlobSourcer              = sourcer.NewGlobSourcer
 	NewEnvSourcer               = sourcer.NewEnvSourcer
 	NewFileSourcer              = sourcer.NewFileSourcer
+	NewYAMLFileSourcer          = sourcer.NewYAMLFileSourcer
+	NewTOMLFileSourcer          = sourcer.NewTOMLFileSourcer
 	NewOptionalFileSourcer      = sourcer.NewOptionalFileSourcer
 	NewDirectorySourcer         = sourcer.NewDirectorySourcer
 	NewOptionalDirectorySourcer = sourcer.NewOptionalDirectorySourcer

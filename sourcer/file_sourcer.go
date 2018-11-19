@@ -23,10 +23,10 @@ type (
 )
 
 var parserMap = map[string]FileParser{
-	".yaml": ParseYAML,
-	".yml":  ParseYAML,
-	".json": ParseYAML,
-	".toml": ParseTOML,
+	".yaml": parseYAML,
+	".yml":  parseYAML,
+	".json": parseYAML,
+	".toml": parseTOML,
 }
 
 // NewOptionalFileSourcer creates a file sourcer if the provided file exists. If
@@ -85,15 +85,25 @@ func (s *fileSourcer) Dump() map[string]string {
 //
 // Parsers
 
+// NewYAMLFileSourcer creates a file sourcer that parses conent as YAML.
+func NewYAMLFileSourcer(filename string) Sourcer {
+	return NewFileSourcer(filename, parseYAML)
+}
+
+// NewTOMLFileSourcer creates a file sourcer that parses conent as TOML.
+func NewTOMLFileSourcer(filename string) Sourcer {
+	return NewFileSourcer(filename, parseTOML)
+}
+
 // ParseYAML parses the given content as YAML.
-func ParseYAML(content []byte) (map[string]interface{}, error) {
+func parseYAML(content []byte) (map[string]interface{}, error) {
 	return commonParser(content, func(content []byte, values interface{}) error {
 		return yaml.Unmarshal(content, values)
 	})
 }
 
 // ParseTOML parses the given content as JSON.
-func ParseTOML(content []byte) (map[string]interface{}, error) {
+func parseTOML(content []byte) (map[string]interface{}, error) {
 	return commonParser(content, toml.Unmarshal)
 }
 
@@ -104,16 +114,6 @@ func commonParser(content []byte, unmarshaller func([]byte, interface{}) error) 
 	}
 
 	return values, nil
-}
-
-// NewYAMLFileSourcer creates a file sourcer that parses conent as YAML.
-func NewYAMLFileSourcer(filename string) Sourcer {
-	return NewFileSourcer(filename, ParseYAML)
-}
-
-// NewTOMLFileSourcer creates a file sourcer that parses conent as TOML.
-func NewTOMLFileSourcer(filename string) Sourcer {
-	return NewFileSourcer(filename, ParseTOML)
 }
 
 //
