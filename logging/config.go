@@ -31,17 +31,12 @@ type (
 // NewLoggingConfig wraps a config object with logging. After each successful load,
 // the populated configuration object is serialized as fields and output at the info
 // level.
-func NewLoggingConfig(config config.Config, logger Logger, configs ...ConfigFunc) config.Config {
-	c := &loggingConfig{
-		Config: config,
-		logger: logger,
+func NewLoggingConfig(config config.Config, logger Logger, maskedKeys []string) config.Config {
+	return &loggingConfig{
+		Config:     config,
+		logger:     logger,
+		maskedKeys: maskedKeys,
 	}
-
-	for _, f := range configs {
-		f(c)
-	}
-
-	return c
 }
 
 func (c *loggingConfig) Load(target interface{}, modifiers ...tags.TagModifier) error {

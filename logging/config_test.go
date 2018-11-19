@@ -15,7 +15,7 @@ func (s *LoggingConfigSuite) TestLoadLogs(t sweet.T) {
 	var (
 		config = NewMockConfig()
 		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger)
+		lc     = NewLoggingConfig(config, logger, nil)
 		chunk  = &fixtures.TestSimpleConfig{}
 	)
 
@@ -37,7 +37,7 @@ func (s *LoggingConfigSuite) TestMask(t sweet.T) {
 	var (
 		config = NewMockConfig()
 		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger)
+		lc     = NewLoggingConfig(config, logger, nil)
 		chunk  = &fixtures.TestMaskConfig{}
 	)
 
@@ -59,7 +59,7 @@ func (s *LoggingConfigSuite) TestBadMaskTag(t sweet.T) {
 	var (
 		config = NewMockConfig()
 		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger)
+		lc     = NewLoggingConfig(config, logger, nil)
 		chunk  = &fixtures.TestBadMaskTagConfig{}
 	)
 
@@ -75,7 +75,7 @@ func (s *LoggingConfigSuite) TestMustLoadLogs(t sweet.T) {
 	var (
 		config = NewMockConfig()
 		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger)
+		lc     = NewLoggingConfig(config, logger, nil)
 		chunk  = &fixtures.TestSimpleConfig{}
 	)
 
