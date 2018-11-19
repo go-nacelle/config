@@ -56,6 +56,10 @@ func (s *envSourcer) Get(values []string) (string, SourcerFlag, error) {
 	return "", FlagMissing, nil
 }
 
+func (s *envSourcer) Assets() []string {
+	return []string{"<os environment>"}
+}
+
 func (s *envSourcer) Dump() map[string]string {
 	values := map[string]string{}
 	for _, name := range getNames() {

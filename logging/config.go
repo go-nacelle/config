@@ -61,6 +61,8 @@ func (c *loggingConfig) MustLoad(target interface{}, modifiers ...tags.TagModifi
 }
 
 func (c *loggingConfig) dumpSource() error {
+	assets := strings.Join(c.Config.Assets(), ", ")
+
 	chunk := map[string]interface{}{}
 	for key, value := range c.Config.Dump() {
 		if c.isMasked(key) {
@@ -70,7 +72,8 @@ func (c *loggingConfig) dumpSource() error {
 		}
 	}
 
-	c.logger.Printf("Failed to load config, dumping source: %s", normalizeChunk(chunk))
+	c.logger.Printf("Config source assets: %s", assets)
+	c.logger.Printf("Config source contents: %s", normalizeChunk(chunk))
 	return nil
 }
 

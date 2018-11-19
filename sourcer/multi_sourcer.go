@@ -71,6 +71,15 @@ func (s *multiSourcer) Get(values []string) (string, SourcerFlag, error) {
 	return "", FlagMissing, nil
 }
 
+func (s *multiSourcer) Assets() []string {
+	assets := []string{}
+	for _, sourcer := range s.sourcers {
+		assets = append(assets, sourcer.Assets()...)
+	}
+
+	return assets
+}
+
 func (s *multiSourcer) Dump() map[string]string {
 	values := map[string]string{}
 	for i := len(s.sourcers) - 1; i >= 0; i-- {

@@ -16,7 +16,8 @@ import (
 
 type (
 	fileSourcer struct {
-		values map[string]string
+		filename string
+		values   map[string]string
 	}
 
 	FileParser func(content []byte) (map[string]interface{}, error)
@@ -55,7 +56,10 @@ func NewFileSourcer(filename string, parser FileParser) Sourcer {
 		return newErrorSourcer(err)
 	}
 
-	return &fileSourcer{values: jsonValues}
+	return &fileSourcer{
+		filename: filename,
+		values:   jsonValues,
+	}
 }
 
 func (s *fileSourcer) Tags() []string {
@@ -76,6 +80,10 @@ func (s *fileSourcer) Get(values []string) (string, SourcerFlag, error) {
 	}
 
 	return "", FlagMissing, nil
+}
+
+func (s *fileSourcer) Assets() []string {
+	return []string{s.filename}
 }
 
 func (s *fileSourcer) Dump() map[string]string {

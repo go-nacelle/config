@@ -17,6 +17,11 @@ type (
 		// skippable.
 		Get(values []string) (string, SourcerFlag, error)
 
+		// Assets returns a list of names of assets that compose the sourcer.
+		// This can be a list of matched files that are read, or a token that
+		// denotes a fixed source.
+		Assets() []string
+
 		// Dump returns the full content of the sourcer. This is used by the
 		// logging package to show the content of the environment and config
 		// files when a value is missing or otherwise illegal.

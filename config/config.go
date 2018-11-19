@@ -25,9 +25,14 @@ type (
 		// MustInject calls Injects and panics on error.
 		MustLoad(interface{}, ...tags.TagModifier)
 
-		// Dump returns the full content of the underlyign sourcer. This is
-		// used by the logging package to show the content of the environment
-		// and config files when a value is missing or otherwise illegal.
+		// Assets returns a list of names of assets that compose the underlying
+		// sourcer. This can be a list of matched files that are read, or a token
+		// that denotes a fixed source.
+		Assets() []string
+
+		// Dump returns the full content of the underlying sourcer. This is used
+		// by the logging package to show the content of the environment and config
+		// files when a value is missing or otherwise illegal.
 		Dump() map[string]string
 	}
 
@@ -82,6 +87,10 @@ func (c *config) MustLoad(target interface{}, modifiers ...tags.TagModifier) {
 	if err := c.Load(target, modifiers...); err != nil {
 		panic(err.Error())
 	}
+}
+
+func (c *config) Assets() []string {
+	return c.sourcer.Assets()
 }
 
 func (c *config) Dump() map[string]string {
