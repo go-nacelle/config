@@ -53,7 +53,7 @@ func (c *loggingConfig) Load(target interface{}, modifiers ...tags.TagModifier) 
 	}
 
 	sort.Strings(values)
-	c.logger.Printf("Config loaded from environment: %s", strings.Join(values, ", "))
+	c.logger.Printf("Config loaded: %s", strings.Join(values, ", "))
 	return nil
 }
 
