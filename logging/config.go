@@ -76,7 +76,7 @@ func (c *loggingConfig) dumpSource() error {
 
 func (c *loggingConfig) isMasked(target string) bool {
 	for _, key := range c.maskedKeys {
-		if key == target {
+		if strings.ToLower(key) == strings.ToLower(target) {
 			return true
 		}
 	}
