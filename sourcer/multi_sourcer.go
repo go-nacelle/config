@@ -70,3 +70,14 @@ func (s *multiSourcer) Get(values []string) (string, SourcerFlag, error) {
 
 	return "", FlagMissing, nil
 }
+
+func (s *multiSourcer) Dump() map[string]string {
+	values := map[string]string{}
+	for i := len(s.sourcers) - 1; i >= 0; i-- {
+		for k, v := range s.sourcers[i].Dump() {
+			values[k] = v
+		}
+	}
+
+	return values
+}

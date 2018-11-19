@@ -78,6 +78,10 @@ func (s *fileSourcer) Get(values []string) (string, SourcerFlag, error) {
 	return "", FlagMissing, nil
 }
 
+func (s *fileSourcer) Dump() map[string]string {
+	return s.values
+}
+
 //
 // Parsers
 

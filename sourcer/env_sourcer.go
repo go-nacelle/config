@@ -55,3 +55,21 @@ func (s *envSourcer) Get(values []string) (string, SourcerFlag, error) {
 
 	return "", FlagMissing, nil
 }
+
+func (s *envSourcer) Dump() map[string]string {
+	values := map[string]string{}
+	for _, name := range getNames() {
+		values[name] = os.Getenv(name)
+	}
+
+	return values
+}
+
+func getNames() []string {
+	names := []string{}
+	for _, pair := range os.Environ() {
+		names = append(names, strings.Split(pair, "=")[0])
+	}
+
+	return names
+}

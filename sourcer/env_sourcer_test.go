@@ -31,3 +31,11 @@ func (s *EnvSourcerSuite) TestNormalizedPrefix(t sweet.T) {
 	Expect(val1).To(Equal("foo"))
 	Expect(val2).To(Equal("123"))
 }
+
+func (s *EnvSourcerSuite) TestDump(t sweet.T) {
+	os.Setenv("X", "foo")
+	os.Setenv("Y", "123")
+
+	Expect(NewEnvSourcer("app").Dump()["X"]).To(Equal("foo"))
+	Expect(NewEnvSourcer("app").Dump()["Y"]).To(Equal("123"))
+}

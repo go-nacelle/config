@@ -16,6 +16,11 @@ type (
 		// population whether or not this value should be treated as missing or
 		// skippable.
 		Get(values []string) (string, SourcerFlag, error)
+
+		// Dump returns the full content of the sourcer. This is used by the
+		// logging package to show the content of the environment and config
+		// files when a value is missing or otherwise illegal.
+		Dump() map[string]string
 	}
 
 	SourcerFlag int

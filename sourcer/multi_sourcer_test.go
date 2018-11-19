@@ -103,3 +103,18 @@ func (s *MultiSourcerSuite) TestMultiSourceSkip(t sweet.T) {
 	Expect(err).To(BeNil())
 	Expect(flag).To(Equal(FlagSkip))
 }
+
+func (s *MultiSourcerSuite) TestDump(t sweet.T) {
+	s1 := NewMockSourcer()
+	s2 := NewMockSourcer()
+	s3 := NewMockSourcer()
+	s1.DumpFunc.SetDefaultReturn(map[string]string{"a": "foo"})
+	s2.DumpFunc.SetDefaultReturn(map[string]string{"b": "bar", "a": "bonk"})
+	s3.DumpFunc.SetDefaultReturn(map[string]string{"c": "baz"})
+
+	Expect(NewMultiSourcer(s3, s2, s1).Dump()).To(Equal(map[string]string{
+		"a": "bonk",
+		"b": "bar",
+		"c": "baz",
+	}))
+}

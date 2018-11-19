@@ -24,6 +24,11 @@ type (
 
 		// MustInject calls Injects and panics on error.
 		MustLoad(interface{}, ...tags.TagModifier)
+
+		// Dump returns the full content of the underlyign sourcer. This is
+		// used by the logging package to show the content of the environment
+		// and config files when a value is missing or otherwise illegal.
+		Dump() map[string]string
 	}
 
 	// PostLoadConfig is a marker interface for configuration objects
@@ -77,6 +82,10 @@ func (c *config) MustLoad(target interface{}, modifiers ...tags.TagModifier) {
 	if err := c.Load(target, modifiers...); err != nil {
 		panic(err.Error())
 	}
+}
+
+func (c *config) Dump() map[string]string {
+	return c.sourcer.Dump()
 }
 
 func (c *config) load(target interface{}) []error {

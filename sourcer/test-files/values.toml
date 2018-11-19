@@ -1,6 +1,6 @@
 foo = "bar"
 bar = [1, 2, 3]
-encoded= '{"w": 4}'
+encoded = '{"w": 4}'
 
 [bonk]
 x = 1

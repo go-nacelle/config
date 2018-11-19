@@ -17,7 +17,8 @@ import (
 type (
 	loggingConfig struct {
 		config.Config
-		logger Logger
+		logger     Logger
+		maskedKeys []string
 	}
 
 	// Logger is an interface to the logger where config values are printed.
@@ -30,30 +31,31 @@ type (
 // NewLoggingConfig wraps a config object with logging. After each successful load,
 // the populated configuration object is serialized as fields and output at the info
 // level.
-func NewLoggingConfig(config config.Config, logger Logger) config.Config {
-	return &loggingConfig{
+func NewLoggingConfig(config config.Config, logger Logger, configs ...ConfigFunc) config.Config {
+	c := &loggingConfig{
 		Config: config,
 		logger: logger,
 	}
+
+	for _, f := range configs {
+		f(c)
+	}
+
+	return c
 }
 
 func (c *loggingConfig) Load(target interface{}, modifiers ...tags.TagModifier) error {
 	if err := c.Config.Load(target, modifiers...); err != nil {
+		c.dumpSource()
 		return err
 	}
 
-	m, err := dumpChunk(target)
+	chunk, err := dumpChunk(target)
 	if err != nil {
 		return fmt.Errorf("failed to serialize config (%s)", err.Error())
 	}
 
-	values := []string{}
-	for key, value := range m {
-		values = append(values, fmt.Sprintf("%s=%v", key, value))
-	}
-
-	sort.Strings(values)
-	c.logger.Printf("Config loaded: %s", strings.Join(values, ", "))
+	c.logger.Printf("Config loaded: %s", normalizeChunk(chunk))
 	return nil
 }
 
@@ -61,6 +63,30 @@ func (c *loggingConfig) MustLoad(target interface{}, modifiers ...tags.TagModifi
 	if err := c.Load(target, modifiers...); err != nil {
 		panic(err.Error())
 	}
+}
+
+func (c *loggingConfig) dumpSource() error {
+	chunk := map[string]interface{}{}
+	for key, value := range c.Config.Dump() {
+		if c.isMasked(key) {
+			chunk[key] = "*****"
+		} else {
+			chunk[key] = value
+		}
+	}
+
+	c.logger.Printf("Failed to load config, dumping source: %s", normalizeChunk(chunk))
+	return nil
+}
+
+func (c *loggingConfig) isMasked(target string) bool {
+	for _, key := range c.maskedKeys {
+		if key == target {
+			return true
+		}
+	}
+
+	return false
 }
 
 func dumpChunk(obj interface{}) (map[string]interface{}, error) {
@@ -107,4 +133,18 @@ func dumpChunk(obj interface{}) (map[string]interface{}, error) {
 	}
 
 	return m, nil
+}
+
+func normalizeChunk(chunk map[string]interface{}) string {
+	if len(chunk) == 0 {
+		return "<no values>"
+	}
+
+	values := []string{}
+	for key, value := range chunk {
+		values = append(values, fmt.Sprintf("%s=%v", key, value))
+	}
+
+	sort.Strings(values)
+	return "\n" + strings.Join(values, "\n")
 }

@@ -29,7 +29,7 @@ func (s *LoggingConfigSuite) TestLoadLogs(t sweet.T) {
 	Expect(lc.Load(chunk)).To(BeNil())
 	Expect(logger.PrintfFunc).To(BeCalledOnceWith(
 		"Config loaded: %s",
-		`Q=["bar","baz","bonk"], X=foo, Y=123`,
+		"\nQ=[\"bar\",\"baz\",\"bonk\"]\nX=foo\nY=123",
 	))
 }
 
@@ -51,7 +51,7 @@ func (s *LoggingConfigSuite) TestMask(t sweet.T) {
 	Expect(lc.Load(chunk)).To(BeNil())
 	Expect(logger.PrintfFunc).To(BeCalledOnceWith(
 		"Config loaded: %s",
-		"X=foo",
+		"\nX=foo",
 	))
 }
 

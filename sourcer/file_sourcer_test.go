@@ -1,6 +1,9 @@
 package sourcer
 
-import "github.com/aphistic/sweet"
+import (
+	"github.com/aphistic/sweet"
+	. "github.com/onsi/gomega"
+)
 
 type FileSourcerSuite struct{}
 
@@ -32,6 +35,18 @@ func (s *FileSourcerSuite) TestOptionalFileSourcer(t sweet.T) {
 		NewOptionalFileSourcer("test-files/no-such-file.json", nil),
 		[]string{"foo"},
 	)
+}
+func (s *FileSourcerSuite) TestDump(t sweet.T) {
+	sourcer := NewOptionalFileSourcer("test-files/values.json", ParseYAML)
+
+	Expect(sourcer.Dump()).To(Equal(map[string]string{
+		"foo":     `bar`,
+		"bar":     `[1,2,3]`,
+		"baz":     `null`,
+		"bonk":    `{"x":1,"y":2,"z":3}`,
+		"encoded": `{"w": 4}`,
+		"deeply":  `{"nested":{"struct":[1,2,3]}}`,
+	}))
 }
 
 func testFileSourcer(sourcer Sourcer) {
