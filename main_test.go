@@ -18,11 +18,13 @@ func TestMain(m *testing.M) {
 
 		s.AddSuite(&ConfigSuite{})
 		s.AddSuite(&DefaultTagSetterSuite{})
+		s.AddSuite(&DefaultTagSetterSuite{})
 		s.AddSuite(&DirectorySourcerSuite{})
 		s.AddSuite(&EnvSourcerSuite{})
 		s.AddSuite(&EnvTagPrefixerSuite{})
 		s.AddSuite(&FileSourcerSuite{})
 		s.AddSuite(&FileTagPrefixerSuite{})
+		s.AddSuite(&FileTagSetterSuite{})
 		s.AddSuite(&GlobSourcerSuite{})
 		s.AddSuite(&JSONSuite{})
 		s.AddSuite(&LoggingConfigSuite{})
