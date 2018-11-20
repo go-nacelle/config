@@ -8,7 +8,7 @@ import (
 type FileSourcerSuite struct{}
 
 func (s *FileSourcerSuite) TestLoadJSON(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.json", parseYAML))
+	testFileSourcer(NewFileSourcer("test-files/values.json", ParseYAML))
 }
 
 func (s *FileSourcerSuite) TestLoadJSONNoParser(t sweet.T) {
@@ -16,14 +16,14 @@ func (s *FileSourcerSuite) TestLoadJSONNoParser(t sweet.T) {
 }
 
 func (s *FileSourcerSuite) TestLoadYAML(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.yaml", parseYAML))
+	testFileSourcer(NewFileSourcer("test-files/values.yaml", ParseYAML))
 }
 func (s *FileSourcerSuite) TestLoadYAMLNoParser(t sweet.T) {
 	testFileSourcer(NewFileSourcer("test-files/values.yaml", nil))
 }
 
 func (s *FileSourcerSuite) TestLoadTOML(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.toml", parseTOML))
+	testFileSourcer(NewFileSourcer("test-files/values.toml", ParseTOML))
 }
 
 func (s *FileSourcerSuite) TestLoadTOMLNoParser(t sweet.T) {
@@ -37,7 +37,7 @@ func (s *FileSourcerSuite) TestOptionalFileSourcer(t sweet.T) {
 	)
 }
 func (s *FileSourcerSuite) TestDump(t sweet.T) {
-	sourcer := NewOptionalFileSourcer("test-files/values.json", parseYAML)
+	sourcer := NewOptionalFileSourcer("test-files/values.json", ParseYAML)
 
 	Expect(sourcer.Dump()).To(Equal(map[string]string{
 		"foo":     `bar`,

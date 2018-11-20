@@ -24,10 +24,10 @@ type (
 )
 
 var parserMap = map[string]FileParser{
-	".yaml": parseYAML,
-	".yml":  parseYAML,
-	".json": parseYAML,
-	".toml": parseTOML,
+	".yaml": ParseYAML,
+	".yml":  ParseYAML,
+	".json": ParseYAML,
+	".toml": ParseTOML,
 }
 
 // NewOptionalFileSourcer creates a file sourcer if the provided file exists. If
@@ -95,23 +95,23 @@ func (s *fileSourcer) Dump() map[string]string {
 
 // NewYAMLFileSourcer creates a file sourcer that parses conent as YAML.
 func NewYAMLFileSourcer(filename string) Sourcer {
-	return NewFileSourcer(filename, parseYAML)
+	return NewFileSourcer(filename, ParseYAML)
 }
 
 // NewTOMLFileSourcer creates a file sourcer that parses conent as TOML.
 func NewTOMLFileSourcer(filename string) Sourcer {
-	return NewFileSourcer(filename, parseTOML)
+	return NewFileSourcer(filename, ParseTOML)
 }
 
 // ParseYAML parses the given content as YAML.
-func parseYAML(content []byte) (map[string]interface{}, error) {
+func ParseYAML(content []byte) (map[string]interface{}, error) {
 	return commonParser(content, func(content []byte, values interface{}) error {
 		return yaml.Unmarshal(content, values)
 	})
 }
 
 // ParseTOML parses the given content as JSON.
-func parseTOML(content []byte) (map[string]interface{}, error) {
+func ParseTOML(content []byte) (map[string]interface{}, error) {
 	return commonParser(content, toml.Unmarshal)
 }
 
