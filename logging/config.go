@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/efritz/zubrin/config"
-	"github.com/efritz/zubrin/internal/consts"
-	"github.com/efritz/zubrin/internal/util"
-	"github.com/efritz/zubrin/tags"
+	"github.com/go-nacelle/config/config"
+	"github.com/go-nacelle/config/internal/consts"
+	"github.com/go-nacelle/config/internal/util"
+	"github.com/go-nacelle/config/tags"
 )
 
 type (

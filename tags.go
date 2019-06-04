@@ -1,6 +1,6 @@
 package zubrin
 
-import "github.com/efritz/zubrin/tags"
+import "github.com/go-nacelle/config/tags"
 
 type TagModifier = tags.TagModifier
 

@@ -1,6 +1,6 @@
 # Zubrin
 
-[![GoDoc](https://godoc.org/github.com/efritz/zubrin?status.svg)](https://godoc.org/github.com/efritz/zubrin)
+[![GoDoc](https://godoc.org/github.com/go-nacelle/config?status.svg)](https://godoc.org/github.com/go-nacelle/config)
 [![Build Status](https://secure.travis-ci.org/efritz/zubrin.png)](http://travis-ci.org/efritz/zubrin)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/maintainability)](https://codeclimate.com/github/efritz/zubrin/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/test_coverage)](https://codeclimate.com/github/efritz/zubrin/test_coverage)

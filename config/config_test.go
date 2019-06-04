@@ -9,9 +9,9 @@ import (
 	"github.com/aphistic/sweet"
 	. "github.com/onsi/gomega"
 
-	"github.com/efritz/zubrin/internal/fixtures"
-	"github.com/efritz/zubrin/sourcer"
-	"github.com/efritz/zubrin/tags"
+	"github.com/go-nacelle/config/internal/fixtures"
+	"github.com/go-nacelle/config/sourcer"
+	"github.com/go-nacelle/config/tags"
 )
 
 type ConfigSuite struct{}

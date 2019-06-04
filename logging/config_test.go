@@ -5,8 +5,8 @@ import (
 	. "github.com/efritz/go-mockgen/matchers"
 	. "github.com/onsi/gomega"
 
-	"github.com/efritz/zubrin/internal/fixtures"
-	tags "github.com/efritz/zubrin/tags"
+	"github.com/go-nacelle/config/internal/fixtures"
+	tags "github.com/go-nacelle/config/tags"
 )
 
 type LoggingConfigSuite struct{}

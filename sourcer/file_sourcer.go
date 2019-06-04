@@ -11,7 +11,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/ghodss/yaml"
 
-	"github.com/efritz/zubrin/internal/consts"
+	"github.com/go-nacelle/config/internal/consts"
 )
 
 type (

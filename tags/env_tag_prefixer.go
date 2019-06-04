@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/structtag"
 
-	"github.com/efritz/zubrin/internal/consts"
+	"github.com/go-nacelle/config/internal/consts"
 )
 
 type envTagPrefixer struct {

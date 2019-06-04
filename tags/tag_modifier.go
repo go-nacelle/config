@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/structtag"
 
-	"github.com/efritz/zubrin/internal/util"
+	"github.com/go-nacelle/config/internal/util"
 )
 
 // TagModifier is an interface that rewrites a set of tags for a struct

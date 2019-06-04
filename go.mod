@@ -1,4 +1,4 @@
-module github.com/efritz/zubrin
+module github.com/go-nacelle/config
 
 require (
 	github.com/BurntSushi/toml v0.3.1

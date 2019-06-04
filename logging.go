@@ -1,6 +1,6 @@
 package zubrin
 
-import "github.com/efritz/zubrin/logging"
+import "github.com/go-nacelle/config/logging"
 
 type Logger = logging.Logger
 

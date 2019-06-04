@@ -1,6 +1,6 @@
 package zubrin
 
-import "github.com/efritz/zubrin/config"
+import "github.com/go-nacelle/config/config"
 
 type Config = config.Config
 
