@@ -1,4 +1,4 @@
-package zubrin
+package config
 
 import "github.com/go-nacelle/config/config"
 
