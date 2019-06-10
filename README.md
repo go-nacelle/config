@@ -5,6 +5,9 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/maintainability)](https://codeclimate.com/github/go-nacelle/config/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/test_coverage)](https://codeclimate.com/github/go-nacelle/config/test_coverage)
 
+[![CircleCI](https://circleci.com/gh/go-nacelle/config.svg?style=svg)](https://circleci.com/gh/go-nacelle/config)
+[![Coverage Status](https://coveralls.io/repos/github/go-nacelle/config/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/config?branch=master)
+
 Zubrin is a configuration loader for Golang.
 
 ## Overview
