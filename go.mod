@@ -7,6 +7,7 @@ require (
 	github.com/efritz/go-mockgen v0.0.0-20181025151746-efd6a0b3e163
 	github.com/fatih/structtag v1.0.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mattn/go-zglob v0.0.0-20180803001819-2ea3427bfa53
@@ -19,4 +20,20 @@ require (
 	golang.org/x/sys v0.0.0-20181228144115-9a3f9b0469bb // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
+)
+
+replace (
+	github.com/go-nacelle/awsutil => /Users/efritz/dev/go-nacelle/awsutil
+	github.com/go-nacelle/chevron => /Users/efritz/dev/go-nacelle/chevron
+	github.com/go-nacelle/config => /Users/efritz/dev/go-nacelle/config
+	github.com/go-nacelle/grpcbase => /Users/efritz/dev/go-nacelle/grpcbase
+	github.com/go-nacelle/httpbase => /Users/efritz/dev/go-nacelle/httpbase
+	github.com/go-nacelle/lambdabase => /Users/efritz/dev/go-nacelle/lambdabase
+	github.com/go-nacelle/log => /Users/efritz/dev/go-nacelle/log
+	github.com/go-nacelle/nacelle => /Users/efritz/dev/go-nacelle/nacelle
+	github.com/go-nacelle/pgutil => /Users/efritz/dev/go-nacelle/pgutil
+	github.com/go-nacelle/process => /Users/efritz/dev/go-nacelle/process
+	github.com/go-nacelle/scarf => /Users/efritz/dev/go-nacelle/scarf
+	github.com/go-nacelle/service => /Users/efritz/dev/go-nacelle/service
+	github.com/go-nacelle/workerbase => /Users/efritz/dev/go-nacelle/workerbase
 )

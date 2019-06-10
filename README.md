@@ -1,9 +1,9 @@
 # Zubrin
 
 [![GoDoc](https://godoc.org/github.com/go-nacelle/config?status.svg)](https://godoc.org/github.com/go-nacelle/config)
-[![Build Status](https://secure.travis-ci.org/efritz/zubrin.png)](http://travis-ci.org/efritz/zubrin)
-[![Maintainability](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/maintainability)](https://codeclimate.com/github/efritz/zubrin/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/test_coverage)](https://codeclimate.com/github/efritz/zubrin/test_coverage)
+[![Build Status](https://secure.travis-ci.org/go-nacelle/config.png)](http://travis-ci.org/go-nacelle/config)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/maintainability)](https://codeclimate.com/github/go-nacelle/config/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/test_coverage)](https://codeclimate.com/github/go-nacelle/config/test_coverage)
 
 Zubrin is a configuration loader for Golang.
 
