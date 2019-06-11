@@ -1,19 +1,14 @@
-# Zubrin
+# Nacelle Config [![GoDoc](https://godoc.org/github.com/go-nacelle/config?status.svg)](https://godoc.org/github.com/go-nacelle/config) [![CircleCI](https://circleci.com/gh/go-nacelle/config.svg?style=svg)](https://circleci.com/gh/go-nacelle/config) [![Coverage Status](https://coveralls.io/repos/github/go-nacelle/config/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/config?branch=master)
 
-[![GoDoc](https://godoc.org/github.com/go-nacelle/config?status.svg)](https://godoc.org/github.com/go-nacelle/config)
-[![Build Status](https://secure.travis-ci.org/go-nacelle/config.png)](http://travis-ci.org/go-nacelle/config)
-[![Maintainability](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/maintainability)](https://codeclimate.com/github/go-nacelle/config/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/b4ca5fb8bc6c4c395a12/test_coverage)](https://codeclimate.com/github/go-nacelle/config/test_coverage)
+Configuration loading and validation for [nacelle](https://github.com/go-nacelle/nacelle).
 
-[![CircleCI](https://circleci.com/gh/go-nacelle/config.svg?style=svg)](https://circleci.com/gh/go-nacelle/config)
-[![Coverage Status](https://coveralls.io/repos/github/go-nacelle/config/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/config?branch=master)
+---
 
-Zubrin is a configuration loader for Golang.
+This package assigns values to the fields of configuration structs by reading a
+conigurable source (e.g. environment, disk) and correlating them with struct tags.
 
-## Overview
-
-Zubrin populates application configuration from a configurable source and injects
-the values into an (initially zero-valued) struct requestedd by the application.
+Basic validation (types and required values) is included, as is an extension point
+which provides arbitrary validation in-code.
 
 ## Usage
 
@@ -21,10 +16,10 @@ We use the following configuration struct as an example.
 
 ```go
 type Config struct {
-    A string        `env:"X"`
-    B bool          `env:"Y" default:"true"`
-    C string        `env:"Z" required:"true"`
-    D []string      `env:"W" default:"[\"foo\", \"bar\", \"baz\"]"`
+    A string   `env:"X"`
+    B bool     `env:"Y" default:"true"`
+    C string   `env:"Z" required:"true"`
+    D []string `env:"W" default:"[\"foo\", \"bar\", \"baz\"]"`
 }
 ```
 
@@ -112,7 +107,7 @@ of a field may need to be altered. This issue can also arise when two
 instances of the same configuration struct are registered but shouldn't get
 clashing defaults (e.g. a default listening port).
 
-Zubrin provides two tag modifiers which can be applied at configuration
+Two tag modifiers are provided which can be applied at configuration
 registration time. In the following, the configuration struct is loaded
 such that the environment variables used to hydrate the object are `Q_X`,
 `Q_Y`, `Q_Z`, `Q_W`, instead of `X`, `Y`, `Z`, and `W` the default value
@@ -124,8 +119,8 @@ target := &Config{}
 
 if err := config.Load(
     target,
-    zubrin.NewEnvTagPrefixer("Q")
-    zubrin.NewDefaultTagSetter("B", "false"),
+    NewEnvTagPrefixer("Q")
+    NewDefaultTagSetter("B", "false"),
 ); err != nil {
     // ...
 }
@@ -136,25 +131,3 @@ if err := config.Load(
 
 If other dynamic modifications of a configuration struct is necessary,
 simply implement the `TagModifier` interface and use it in the same way.
-
-## License
-
-Copyright (c) 2018 Eric Fritz
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
