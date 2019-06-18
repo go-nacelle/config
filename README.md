@@ -4,130 +4,123 @@ Configuration loading and validation for [nacelle](https://github.com/go-nacelle
 
 ---
 
-This package assigns values to the fields of configuration structs by reading a
-conigurable source (e.g. environment, disk) and correlating them with struct tags.
+This library assigns values to the fields of **configuration structs** by reading a particular source (e.g. environment or disk) and correlating them with struct tags. Basic validation (types and required values) are included, as well as an extension point to allow arbitrary validation in-code.
 
-Basic validation (types and required values) is included, as is an extension point
-which provides arbitrary validation in-code.
+### Usage
 
-## Usage
-
-We use the following configuration struct as an example.
+Configuration is loaded into the application by assigning the fields of tagged structs. Tagged fields must be exported in order for this package to assign to them. The following example defines configuration for a hypothetical worker process. The address of an API must be supplied, but all other configuration values are optional.
 
 ```go
 type Config struct {
-    A string   `env:"X"`
-    B bool     `env:"Y" default:"true"`
-    C string   `env:"Z" required:"true"`
-    D []string `env:"W" default:"[\"foo\", \"bar\", \"baz\"]"`
+    APIAddr        string   `env:"api_addr" required:"true"`
+    CassandraHosts []string `env:"cassandra_hosts"`
+    NumWorkers     int      `env:"num_workers" default:"10"`
+    BufferSize     int      `env:"buffer_size" default:"1024"`
 }
 ```
 
-When pulling values from a variable source, a missing value (or empty string)
-will use the default value, if provided. If no value is set for a required
-configuration value, a fatal error will occur. String values will retrieve
-the variable value unaltered. All other field types will attempt to unmarshal
-the variable value as JSON.
-
-### Sources
-
-When creating a Config object, you can supply a Sourcer interface which pulls
-values from a specific place (the environment, a file, the network, etc).
+A configuration loader object is created with a **sourcer**, which knows how to acquire values based on struct tags. In the following, we create a sourcer that reads environment variables, then inject the values from the environment into an instance of `Config`. Additional [sourcers](#Sourcers) are supplied.
 
 ```go
-config := NewConfig(NewMultiSourcer(
-    NewYAMLFileSourcer("config.yaml"), // lower priority
-    NewEnvSourcer("APP"),              // higher priority
-))
+config := NewConfig(NewEnvSourcer("APP"))
+
+appConfig := &Config{}
+if err := config.Load(appConfig); err != nil {
+    // handle error
+}
 ```
 
-The following struct loads a variable `X` from the environment or loads the
-path `a.b.c` from a configuration file (this assumes the configuration file
-contains a nested dictionary structure with the path `a.b.c`).
+The `Load` method fails if a value from the source cannot be converted into the correct type, a value from the source cannot be decoded as JSON (if the target is a non-string type), or is required and not supplied.
+
+All sources support the `default` and `required` tags (which are mutually exclusive). Tagged fields must be exported in order for this library to assign to them.
+
+### Post Load Hook
+
+After successful loading of a configuration struct, the method named `PostLoad` will be called if it is defined. This allows a place for additional validation (such as mutually exclusive settings, regex value matching, etc) and deserialization of more complex types (such enums from strings, durations from integers, etc). The following example parses and stores a `text/template` from a user-supplied string.
 
 ```go
+import "text/template"
+
 type Config struct {
-    X string `env:"x" file:"a.b.c"`
+    RawTemplate    string `env:"template" default:"Hello, {{.Name}}!"`
+    ParsedTemplate *template.Template
+}
+
+func (c *Config) PostLoad() (err error) {
+    c.ParsedTemplate, err = template.New("ConfigTemplate").Parse(c.RawTemplate)
+    return
 }
 ```
 
-### PostLoading Configuration Structs
+An error returned by `PostLoad` will be returned via the `Load` method.
 
-After hydration, the `PostLoad` method will be invoked on all registered
-configuration structs (where such a method exists). This allows additional
-non-type validation to occur, and to create any types which are not
-directly/easily encodable as JSON.
+### Anonymous Structs
+
+Loading configuration values also works with structs containing composite fields. The following example shows the definition of multiple configuration structs with a set of shared fields.
 
 ```go
-func (c *Config) PostLoad() error {
-    if c.Field != "foo" && c.Field != "bar" {
-        return fmt.Errorf("field value must be foo or bar")
-    }
+type StreamConfig struct {
+    StreamName string `env:"stream_name" required:"true"`
+}
 
-    return nil
+type StreamProducerConfig struct {
+    StreamConfig
+    PublishAttempts int `env:"publish_attempts" default:"3"`
+    PublishDelay    int `env:"publish_delay" default:"1"`
+}
+
+type StreamConsumerConfig struct {
+    StreamConfig
+    FetchLimit int `env:"fetch_limit" default:"100"`
 }
 ```
 
-### Embedded Configs
+### Logging Config
 
-It is possible to embed anonymous configuration structs in order to get
-configuration reusability. Embedded config structs have the same set of
-struct tags.
+A `LoggingConfig` wraps a configuration object as well as a nacelle [logger](https://github.com/go-nacelle/log). After each successful load of a configuration struct, the loaded configuration values will be logged. This, however, may be a concern for application secrets. In order to hide sensitive configuration values, add the `mask:"true"` struct tag to the field. This will omit that value from the log message. Additionally, the logging config keeps a blacklist of values which should be masked (values printed as `*****` rather than their real value) instead of omitted. This blacklist iss given at the time of construction.
 
-```go
-type (
-    BaseConfig struct {
-        X string `env:"X"`
-        Y string `env:"Y"`
-        Z string `env:"Z"`
-    }
+### Sourcers
 
-    ProducerConfig struct {
-        BaseConfig
-        W string `env:"W"`
-    }
+A sourcer reads values from a particular source based on a configuration struct's tags. Sourcers declare the struct tags that determine their behavior when loading configuration structs. The examples above only work with the environment sourcer. The following six sourcers are supplied. Additional behavior can be added by conforming to the *Sourcer* interface.
 
-    ConsumerConfig struct {
-        BaseConfig
-        Q string `env:"Q"`
+**Environment Sourcer** reads the `env` tag and looks up the corresponding value in the process's environment. An expected prefix may be supplied in order to namespace application configuration from the rest of the system. A sourcer instantiated with `NewEnvSourcer("APP")` will load the env tag `fetch_limit` from the environment variable `APP_FETCH_LIMIT` and falling back to the environment variable `FETCH_LIMT`.
 
-    }
-)
-```
+**Test Environment Sourcer** reads the `env` tag but looks up the corresponding value from a literal map. This sourcer is meant to be used in unit tests where the full construction of a nacelle [process](https://github.com/go-nacelle/process) is beneficial.
 
-### Config Tags
+**File Sourcer** reads the `file` tag and returns the value at the given path. A filename and a file parser musts be supplied on instantiation. Both `ParseYAML` and `ParseTOML` are supplied file parsers -- note that as JSON is a subset of YAML, `ParseYAML` will also correctly parse JSON files. If a `nil` file parser is supplied, one is chosen by the filename extension.
 
-In some circumstances, it may be necessary to dynamically alter the tags
-on a configuration struct. This has become an issue in two circumstances
-so far. First, two instances of the same configuration struct may need to
-be registered but must be configured separately (i.e. they need to look at
-distinct environment variables). This is a particular problem when running
-two HTTP servers with the same base, for example. Second, the default value
-of a field may need to be altered. This issue can also arise when two
-instances of the same configuration struct are registered but shouldn't get
-clashing defaults (e.g. a default listening port).
+A file sourcer will load the file tag `api.timeout` from the given file by parsing it into a map of values and recursively walking the (keys separated by dots). This can return a primitive type or a structured map, as long as the target field has a compatible type.
 
-Two tag modifiers are provided which can be applied at configuration
-registration time. In the following, the configuration struct is loaded
-such that the environment variables used to hydrate the object are `Q_X`,
-`Q_Y`, `Q_Z`, `Q_W`, instead of `X`, `Y`, `Z`, and `W` the default value
-of the struct field `B` (loaded through the environment variable `Q_Y`) is
-false instead of true.
+The constructor `NewOptionalFileSourcer` will return a no-op sourcer if the filename does not exist.
+
+**Directory Sourcer** creates a multi-sourcer by reading each file in a directory in alphabetical order. The constructor `NewOptionalDirectorySourcer` will return a no-op sourcer if the directory does not exist.
+
+**Glob Sourcer** creates a multi-sourcer by reading each file that matches a given glob pattern. Each matching file creates a distinct file sourcer and does so in alphabetical order.
+
+**Multi sourcer** is a sourcer wrapping one or more other sourcers. For each configuration struct field, each sourcer is queried in reverse order of registration and the first value to exist is returned.
+
+### Tag Modifiers
+
+A tag modifier dynamically alters the tags of a configuration struct. The following five tag modifiers are supplied. Additional behavior can be added by conforming to the *TagModifier* interface.
+
+**Default Tag Setter** sets the `default` tag for a particular field. This is useful when the default values supplied by a library are inappropriate for a particular application. This would otherwise require a source change in the library.
+
+**Display Tag Setter** sets the `display` tag to the value of the `env` tag. This tag modifier can be used to provide sane defaults to the tag without doubling the length of the struct tag definition.
+
+**File Tag Setter** sets the `file` tag to the value of the `env` tag. This tag modifier can be used to provide sane defaults to the tag without doubling the length of the struct tag definition.
+
+**Env Tag Prefixer** inserts a prefix on each `env` tags. This is useful when two distinct instances of the same configuration are required, and each one should be configured independently from the other (for example, using the same abstraction to consume from two different event busses with the same consumer code).
+
+**File Tag Prefixer** inserts a prefix on each `file` tag. This effectively looks in a distinct top-level namespace in the parsed configuration. This is similar to the env tag prefixer.
+
+Tag modifiers are supplied at the time that a configuration struct is loaded. In the following example, each env tag is prefixed with `ACME_`, and the CassandraHosts field is given a default. Notice that you supply the *field* name to the tag modifier (not a tag value) when targeting a particular field value.
 
 ```go
-target := &Config{}
-
 if err := config.Load(
-    target,
-    NewEnvTagPrefixer("Q")
-    NewDefaultTagSetter("B", "false"),
+    appConfig,
+    NewEnvTagPrefixer("ACME"),
+    NewDefaultTagSetter("CassandraHosts", "[127.0.0.1:9042]"),
 ); err != nil {
-    // ...
+    // handle error
 }
-
-// target is hydrated
-// ...
 ```
-
-If other dynamic modifications of a configuration struct is necessary,
-simply implement the `TagModifier` interface and use it in the same way.
