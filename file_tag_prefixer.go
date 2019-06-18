@@ -13,7 +13,7 @@ type fileTagPrefixer struct {
 
 // NewFileTagPrefixer creates a new TagModifier which adds a prefix to the
 // values of `file` tags. This can be used to register one config multiple
-// times and have their initialization be read from different keysl in a
+// times and have their initialization be read from different keys in a
 // config file.
 func NewFileTagPrefixer(prefix string) TagModifier {
 	return &fileTagPrefixer{

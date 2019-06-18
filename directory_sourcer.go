@@ -19,7 +19,7 @@ func NewOptionalDirectorySourcer(dirname string, parser FileParser) Sourcer {
 // NewDirectorySourcer creates a sourcer that reads files from a directory. For
 // details on parsing format, refer to NewFileParser. Each file in a directory
 // is read in alphabetical order. Nested directories are ignored when reading
-// direcotry content, and each found regular file is assumed to be parseable by
+// directory content, and each found regular file is assumed to be parseable by
 // the given FileParser.
 func NewDirectorySourcer(dirname string, parser FileParser) Sourcer {
 	entries, err := ioutil.ReadDir(dirname)

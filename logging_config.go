@@ -18,7 +18,7 @@ type (
 
 	// Logger is an interface to the logger where config values are printed.
 	Logger interface {
-		// Printf logs a mesasge. Arguments should be handled in the manner of fmt.Printf.
+		// Printf logs a message. Arguments should be handled in the manner of fmt.Printf.
 		Printf(format string, args ...interface{})
 	}
 )
