@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-// NewOptionalDirectorySourcer creates a directory sourcer if the provided directoy
+// NewOptionalDirectorySourcer creates a directory sourcer if the provided directory
 // exists. the provided file is not found, a sourcer is returned returns no values.
 func NewOptionalDirectorySourcer(dirname string, parser FileParser) Sourcer {
 	if _, err := os.Stat(dirname); err != nil && os.IsNotExist(err) {

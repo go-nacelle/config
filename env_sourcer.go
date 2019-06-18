@@ -15,7 +15,7 @@ var replacePattern = regexp.MustCompile(`[^A-Za-z0-9_]+`)
 
 // NewEnvSourcer creates a Sourcer that pulls values from the environment.
 // The environment variable {PREFIX}_{NAME} is read before and, if empty,
-// the environment varaible {NAME} is read as a fallback. The prefix is
+// the environment variable {NAME} is read as a fallback. The prefix is
 // normalized by replacing all non-alpha characters with an underscore,
 // removing leading and trailing underscores, and collapsing consecutive
 // underscores with a single character.
