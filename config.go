@@ -27,7 +27,7 @@ type (
 
 		// Dump returns the full content of the underlying sourcer. This
 		// is used by the logging package to show the content of the
-		// environment and config iles when a value is missing or otherwise
+		// environment and config files when a value is missing or otherwise
 		// illegal.
 		Dump() map[string]string
 	}
