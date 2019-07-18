@@ -4,7 +4,7 @@ Configuration loading and validation for [nacelle](https://github.com/go-nacelle
 
 ---
 
-This library assigns values to the fields of **configuration structs** by reading a particular source (e.g. environment or disk) and correlating them with struct tags. Basic validation (types and required values) are included, as well as an extension point to allow arbitrary validation in-code.
+Nacelle assigns values to the fields of **configuration structs** by reading a particular source (e.g. environment or disk) and correlating them with struct tags. Basic validation (types and required values) are included, as well as an extension point to allow arbitrary validation in-code.
 
 ### Usage
 
@@ -32,7 +32,7 @@ if err := config.Load(appConfig); err != nil {
 
 The `Load` method fails if a value from the source cannot be converted into the correct type, a value from the source cannot be decoded as JSON (if the target is a non-string type), or is required and not supplied.
 
-All sources support the `default` and `required` tags (which are mutually exclusive). Tagged fields must be exported in order for this library to assign to them.
+All sources support the `default` and `required` tags (which are mutually exclusive). Tagged fields must be exported.
 
 ### Post Load Hook
 
@@ -77,7 +77,7 @@ type StreamConsumerConfig struct {
 
 ### Logging Config
 
-A `LoggingConfig` wraps a configuration object as well as a nacelle [logger](https://github.com/go-nacelle/log). After each successful load of a configuration struct, the loaded configuration values will be logged. This, however, may be a concern for application secrets. In order to hide sensitive configuration values, add the `mask:"true"` struct tag to the field. This will omit that value from the log message. Additionally, the logging config keeps a blacklist of values which should be masked (values printed as `*****` rather than their real value) instead of omitted. This blacklist iss given at the time of construction.
+A `LoggingConfig` wraps a configuration object as well as a nacelle [logger](https://nacelle.dev/docs/core/log). After each successful load of a configuration struct, the loaded configuration values will be logged. This, however, may be a concern for application secrets. In order to hide sensitive configuration values, add the `mask:"true"` struct tag to the field. This will omit that value from the log message. Additionally, the logging config keeps a blacklist of values which should be masked (values printed as `*****` rather than their real value) instead of omitted. This blacklist iss given at the time of construction.
 
 ### Sourcers
 
@@ -85,7 +85,7 @@ A sourcer reads values from a particular source based on a configuration struct'
 
 **Environment Sourcer** reads the `env` tag and looks up the corresponding value in the process's environment. An expected prefix may be supplied in order to namespace application configuration from the rest of the system. A sourcer instantiated with `NewEnvSourcer("APP")` will load the env tag `fetch_limit` from the environment variable `APP_FETCH_LIMIT` and falling back to the environment variable `FETCH_LIMT`.
 
-**Test Environment Sourcer** reads the `env` tag but looks up the corresponding value from a literal map. This sourcer is meant to be used in unit tests where the full construction of a nacelle [process](https://github.com/go-nacelle/process) is beneficial.
+**Test Environment Sourcer** reads the `env` tag but looks up the corresponding value from a literal map. This sourcer is meant to be used in unit tests where the full construction of a nacelle [process](https://nacelle.dev/docs/core/process) is beneficial.
 
 **File Sourcer** reads the `file` tag and returns the value at the given path. A filename and a file parser musts be supplied on instantiation. Both `ParseYAML` and `ParseTOML` are supplied file parsers -- note that as JSON is a subset of YAML, `ParseYAML` will also correctly parse JSON files. If a `nil` file parser is supplied, one is chosen by the filename extension.
 
