@@ -7,12 +7,11 @@ require (
 	github.com/efritz/go-mockgen v0.0.0-20190613153341-3425cf558834
 	github.com/fatih/structtag v1.0.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/kr/pty v1.1.5 // indirect
+	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-zglob v0.0.1
 	github.com/onsi/gomega v1.5.0
-	golang.org/x/crypto v0.0.0-20190617133340-57b3e21c3d56 // indirect
-	golang.org/x/net v0.0.0-20190613194153-d28f0bde5980 // indirect
-	golang.org/x/sys v0.0.0-20190616124812-15dcb6c0061f // indirect
-	golang.org/x/tools v0.0.0-20190617190820-da514acc4774 // indirect
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
+	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
+	golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e // indirect
 )
