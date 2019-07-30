@@ -10,7 +10,7 @@ executors:
     working_directory: ~/config
 
 jobs:
-  build:
+  test:
     executor: go
     steps:
       - checkout
