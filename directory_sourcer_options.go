@@ -3,7 +3,7 @@ package config
 type (
 	directorySourcerOptions struct{ fs FileSystem }
 
-	// DirectorySourcerConfigFunc is a functin used to configure instances of
+	// DirectorySourcerConfigFunc is a function used to configure instances of
 	// directory sourcers.
 	DirectorySourcerConfigFunc func(*directorySourcerOptions)
 )

@@ -3,7 +3,7 @@ package config
 type (
 	fileSourcerOptions struct{ fs FileSystem }
 
-	// FileSourcerConfigFunc is a functin used to configure instances of
+	// FileSourcerConfigFunc is a function used to configure instances of
 	// file sourcers.
 	FileSourcerConfigFunc func(*fileSourcerOptions)
 )
