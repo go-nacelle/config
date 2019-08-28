@@ -19,9 +19,9 @@ type (
 		// Exists determines if the given path exists.
 		Exists(path string) (bool, error)
 
-		// ReadDir returns the names of the entries that are a direct
-		// child of the given path.
-		ReadDir(path string) ([]string, error)
+		// ListFiles returns the names of the files that are a direct
+		// child of the directory at the given path.
+		ListFiles(path string) ([]string, error)
 
 		// Glob returns the paths that the given pattern matches.
 		Glob(pattern string) ([]string, error)
@@ -45,7 +45,7 @@ func (fs *realFileSystem) Exists(path string) (bool, error) {
 	return true, nil
 }
 
-func (fs *realFileSystem) ReadDir(path string) ([]string, error) {
+func (fs *realFileSystem) ListFiles(path string) ([]string, error) {
 	entries, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err

@@ -29,7 +29,7 @@ func NewOptionalDirectorySourcer(dirname string, parser FileParser, configs ...D
 func NewDirectorySourcer(dirname string, parser FileParser, configs ...DirectorySourcerConfigFunc) Sourcer {
 	options := getDirectorySourcerConfigOptions(configs)
 
-	filenames, err := options.fs.ReadDir(dirname)
+	filenames, err := options.fs.ListFiles(dirname)
 	if err != nil {
 		return newErrorSourcer(err)
 	}
