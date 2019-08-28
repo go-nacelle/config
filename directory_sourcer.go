@@ -5,7 +5,7 @@ import (
 )
 
 // NewOptionalDirectorySourcer creates a directory sourcer if the provided directory
-// exists. the provided file is not found, a sourcer is returned returns no values.
+// exists. If the provided file is not found, a sourcer is returned returns no values.
 func NewOptionalDirectorySourcer(dirname string, parser FileParser, configs ...DirectorySourcerConfigFunc) Sourcer {
 	options := getDirectorySourcerConfigOptions(configs)
 
