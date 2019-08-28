@@ -31,7 +31,7 @@ var parserMap = map[string]FileParser{
 func NewOptionalFileSourcer(filename string, parser FileParser, configs ...FileSourcerConfigFunc) Sourcer {
 	options := getFileSourcerConfigOptions(configs)
 
-	exists, err := options.fs.Exists(filename) // TODO - configure
+	exists, err := options.fs.Exists(filename)
 	if err != nil {
 		return newErrorSourcer(err)
 	}
