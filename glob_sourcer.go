@@ -10,7 +10,11 @@ func NewGlobSourcer(pattern string, parser FileParser, configs ...GlobSourcerCon
 	sourcers := []Sourcer{}
 	if paths, err := options.fs.Glob(pattern); err == nil {
 		for _, path := range paths {
-			sourcers = append(sourcers, NewFileSourcer(path, parser))
+			sourcers = append(sourcers, NewFileSourcer(
+				path,
+				parser,
+				WithFileSourcerFS(options.fs),
+			))
 		}
 	}
 

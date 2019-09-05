@@ -36,7 +36,11 @@ func NewDirectorySourcer(dirname string, parser FileParser, configs ...Directory
 
 	sourcers := []Sourcer{}
 	for _, filename := range filenames {
-		sourcers = append(sourcers, NewFileSourcer(filepath.Join(dirname, filename), parser))
+		sourcers = append(sourcers, NewFileSourcer(
+			filepath.Join(dirname, filename),
+			parser,
+			WithFileSourcerFS(options.fs),
+		))
 	}
 
 	return NewMultiSourcer(sourcers...)
