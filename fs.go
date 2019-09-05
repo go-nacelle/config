@@ -8,7 +8,6 @@ import (
 )
 
 type (
-
 	// FileSystem is an interface wrapping filesystem operations for
 	// sourcers that read information from disk. This is necessary in
 	// order to allow remote and in-memory filesystems that may be
