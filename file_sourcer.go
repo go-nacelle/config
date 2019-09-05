@@ -3,8 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -30,12 +28,19 @@ var parserMap = map[string]FileParser{
 
 // NewOptionalFileSourcer creates a file sourcer if the provided file exists. If
 // the provided file is not found, a sourcer is returned returns no values.
-func NewOptionalFileSourcer(filename string, parser FileParser) Sourcer {
-	if _, err := os.Stat(filename); err != nil && os.IsNotExist(err) {
+func NewOptionalFileSourcer(filename string, parser FileParser, configs ...FileSourcerConfigFunc) Sourcer {
+	options := getFileSourcerConfigOptions(configs)
+
+	exists, err := options.fs.Exists(filename)
+	if err != nil {
+		return newErrorSourcer(err)
+	}
+
+	if !exists {
 		return &fileSourcer{values: map[string]string{}}
 	}
 
-	return NewFileSourcer(filename, parser)
+	return NewFileSourcer(filename, parser, configs...)
 }
 
 // NewFileSourcer creates a sourcer that reads content from a file. The format
@@ -43,8 +48,10 @@ func NewOptionalFileSourcer(filename string, parser FileParser) Sourcer {
 // an encoding of a map from string keys to JSON-serializable values. If a nil
 // parser is supplied, one will be selected based on the extension of the file.
 // JSON, YAML, and TOML files are supported.
-func NewFileSourcer(filename string, parser FileParser) Sourcer {
-	values, err := readFile(filename, parser)
+func NewFileSourcer(filename string, parser FileParser, configs ...FileSourcerConfigFunc) Sourcer {
+	options := getFileSourcerConfigOptions(configs)
+
+	values, err := readFile(filename, options.fs, parser)
 	if err != nil {
 		return newErrorSourcer(err)
 	}
@@ -125,8 +132,8 @@ func commonParser(content []byte, unmarshaller func([]byte, interface{}) error) 
 //
 // Helpers
 
-func readFile(filename string, parser FileParser) (map[string]interface{}, error) {
-	content, err := ioutil.ReadFile(filename)
+func readFile(filename string, fs FileSystem, parser FileParser) (map[string]interface{}, error) {
+	content, err := fs.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file '%s' (%s)", filename, err.Error())
 	}
