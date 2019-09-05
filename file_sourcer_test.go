@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/aphistic/sweet"
+	. "github.com/efritz/go-mockgen/matchers"
 	. "github.com/onsi/gomega"
 )
 
@@ -30,12 +31,48 @@ func (s *FileSourcerSuite) TestLoadTOMLNoParser(t sweet.T) {
 	testFileSourcer(NewFileSourcer("test-files/values.toml", nil))
 }
 
+func (s *FileSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
+	fs := NewMockFileSystem()
+	fs.ReadFileFunc.SetDefaultReturn([]byte(`{
+		"foo": "bar",
+		"bar": [1, 2, 3],
+		"baz": null,
+		"bonk": {
+			"x": 1,
+			"y": 2,
+			"z": 3
+		},
+		"encoded": "{\"w\": 4}",
+		"deeply": {
+			"nested": {
+				"struct": [1, 2, 3]
+			}
+		}
+	}`), nil)
+
+	testFileSourcer(NewFileSourcer("test-files/values.json", ParseYAML, WithFileSourcerFS(fs)))
+	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/values.json"))
+}
+
 func (s *FileSourcerSuite) TestOptionalFileSourcer(t sweet.T) {
 	ensureMissing(
 		NewOptionalFileSourcer("test-files/no-such-file.json", nil),
 		[]string{"foo"},
 	)
 }
+
+func (s *FileSourcerSuite) TestOptionalFileSourcerWithFakeFS(t sweet.T) {
+	fs := NewMockFileSystem()
+	fs.ExistsFunc.SetDefaultReturn(false, nil)
+
+	ensureMissing(
+		NewOptionalFileSourcer("test-files/no-such-file.json", nil, WithFileSourcerFS(fs)),
+		[]string{"foo"},
+	)
+
+	Expect(fs.ExistsFunc).To(BeCalledOnceWith("test-files/no-such-file.json"))
+}
+
 func (s *FileSourcerSuite) TestDump(t sweet.T) {
 	sourcer := NewOptionalFileSourcer("test-files/values.json", ParseYAML)
 
