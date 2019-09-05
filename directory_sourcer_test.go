@@ -65,7 +65,7 @@ func (s *DirectorySourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 
 func (s *DirectorySourcerSuite) TestOptionalDirectorySourcer(t sweet.T) {
 	ensureMissing(
-		NewOptionalFileSourcer("test-files/no-such-directory", nil),
+		NewOptionalDirectorySourcer("test-files/no-such-directory", nil),
 		[]string{"foo"},
 	)
 }
