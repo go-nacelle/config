@@ -33,6 +33,10 @@ func NewEnvSourcer(prefix string) Sourcer {
 	return &envSourcer{prefix: prefix}
 }
 
+func (s *envSourcer) Init() error {
+	return nil
+}
+
 func (s *envSourcer) Tags() []string {
 	return []string{EnvTag}
 }
@@ -60,13 +64,13 @@ func (s *envSourcer) Assets() []string {
 	return []string{"<os environment>"}
 }
 
-func (s *envSourcer) Dump() (map[string]string, error) {
+func (s *envSourcer) Dump() map[string]string {
 	values := map[string]string{}
 	for _, name := range getNames() {
 		values[name] = os.Getenv(name)
 	}
 
-	return values, nil
+	return values
 }
 
 func getNames() []string {

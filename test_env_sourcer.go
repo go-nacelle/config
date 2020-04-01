@@ -23,6 +23,10 @@ func NewTestEnvSourcer(values map[string]string) Sourcer {
 	}
 }
 
+func (s *testEnvSourcer) Init() error {
+	return nil
+}
+
 func (s *testEnvSourcer) Tags() []string {
 	return []string{EnvTag}
 }
@@ -43,6 +47,6 @@ func (s *testEnvSourcer) Assets() []string {
 	return []string{"<test environment>"}
 }
 
-func (s *testEnvSourcer) Dump() (map[string]string, error) {
-	return s.values, nil
+func (s *testEnvSourcer) Dump() map[string]string {
+	return s.values
 }

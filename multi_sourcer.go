@@ -11,28 +11,33 @@ type multiSourcer struct {
 
 var _ Sourcer = &multiSourcer{}
 
-// NewMultiSourcer creates a sourcer that reads form each sourcer.
-// The last value found is returned - sourcers should be provided
-// from low priority to high priority.
+// NewMultiSourcer creates a sourcer that reads form each sourcer. The last value
+// found is returned - sourcers should be provided from low priority to high priority.
 func NewMultiSourcer(sourcers ...Sourcer) Sourcer {
-	set := map[string]struct{}{}
-	for _, sourcer := range sourcers {
+	return &multiSourcer{sourcers: sourcers}
+}
+
+func (s *multiSourcer) Init() error {
+	tagSet := map[string]struct{}{}
+	for _, sourcer := range s.sourcers {
+		if err := sourcer.Init(); err != nil {
+			return err
+		}
+
 		for _, tag := range sourcer.Tags() {
-			set[tag] = struct{}{}
+			tagSet[tag] = struct{}{}
 		}
 	}
 
 	tags := []string{}
-	for tag := range set {
+	for tag := range tagSet {
 		tags = append(tags, tag)
 	}
 
 	sort.Strings(tags)
+	s.tags = tags
 
-	return &multiSourcer{
-		sourcers: sourcers,
-		tags:     tags,
-	}
+	return nil
 }
 
 func (s *multiSourcer) Tags() []string {
@@ -82,18 +87,13 @@ func (s *multiSourcer) Assets() []string {
 	return assets
 }
 
-func (s *multiSourcer) Dump() (map[string]string, error) {
+func (s *multiSourcer) Dump() map[string]string {
 	values := map[string]string{}
 	for i := len(s.sourcers) - 1; i >= 0; i-- {
-		dump, err := s.sourcers[i].Dump()
-		if err != nil {
-			return nil, err
-		}
-
-		for k, v := range dump {
+		for k, v := range s.sourcers[i].Dump() {
 			values[k] = v
 		}
 	}
 
-	return values, nil
+	return values
 }
