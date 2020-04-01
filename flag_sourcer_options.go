@@ -19,7 +19,7 @@ func WithFlagSourcerArgs(args []string) FlagSourcerConfigFunc {
 
 func getFlagSourcerConfigOptions(configs []FlagSourcerConfigFunc) *flagSourcerOptions {
 	options := &flagSourcerOptions{
-		args: os.Args,
+		args: os.Args[1:],
 	}
 
 	for _, f := range configs {
