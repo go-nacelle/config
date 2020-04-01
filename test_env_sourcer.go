@@ -8,6 +8,8 @@ type testEnvSourcer struct {
 	values map[string]string
 }
 
+var _ Sourcer = &testEnvSourcer{}
+
 // NewTestEnvSourcer creates a Sourcer that returns values from a given
 // map.
 func NewTestEnvSourcer(values map[string]string) Sourcer {
@@ -41,6 +43,6 @@ func (s *testEnvSourcer) Assets() []string {
 	return []string{"<test environment>"}
 }
 
-func (s *testEnvSourcer) Dump() map[string]string {
-	return s.values
+func (s *testEnvSourcer) Dump() (map[string]string, error) {
+	return s.values, nil
 }

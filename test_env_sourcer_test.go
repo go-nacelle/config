@@ -39,6 +39,8 @@ func (s *TestEnvSourcerSuite) TestDump(t sweet.T) {
 		"Y": "123",
 	}
 
-	Expect(NewTestEnvSourcer(values).Dump()["X"]).To(Equal("foo"))
-	Expect(NewTestEnvSourcer(values).Dump()["Y"]).To(Equal("123"))
+	dump, err := NewTestEnvSourcer(values).Dump()
+	Expect(err).To(BeNil())
+	Expect(dump["X"]).To(Equal("foo"))
+	Expect(dump["Y"]).To(Equal("123"))
 }

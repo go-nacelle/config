@@ -9,6 +9,8 @@ type multiSourcer struct {
 	tags     []string
 }
 
+var _ Sourcer = &multiSourcer{}
+
 // NewMultiSourcer creates a sourcer that reads form each sourcer.
 // The last value found is returned - sourcers should be provided
 // from low priority to high priority.
@@ -80,13 +82,18 @@ func (s *multiSourcer) Assets() []string {
 	return assets
 }
 
-func (s *multiSourcer) Dump() map[string]string {
+func (s *multiSourcer) Dump() (map[string]string, error) {
 	values := map[string]string{}
 	for i := len(s.sourcers) - 1; i >= 0; i-- {
-		for k, v := range s.sourcers[i].Dump() {
+		dump, err := s.sourcers[i].Dump()
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range dump {
 			values[k] = v
 		}
 	}
 
-	return values
+	return values, nil
 }

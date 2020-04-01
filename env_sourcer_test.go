@@ -36,6 +36,8 @@ func (s *EnvSourcerSuite) TestDump(t sweet.T) {
 	os.Setenv("X", "foo")
 	os.Setenv("Y", "123")
 
-	Expect(NewEnvSourcer("app").Dump()["X"]).To(Equal("foo"))
-	Expect(NewEnvSourcer("app").Dump()["Y"]).To(Equal("123"))
+	dump, err := NewEnvSourcer("app").Dump()
+	Expect(err).To(BeNil())
+	Expect(dump["X"]).To(Equal("foo"))
+	Expect(dump["Y"]).To(Equal("123"))
 }

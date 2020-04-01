@@ -11,6 +11,8 @@ type envSourcer struct {
 	prefix string
 }
 
+var _ Sourcer = &envSourcer{}
+
 var replacePattern = regexp.MustCompile(`[^A-Za-z0-9_]+`)
 
 // NewEnvSourcer creates a Sourcer that pulls values from the environment.
@@ -58,13 +60,13 @@ func (s *envSourcer) Assets() []string {
 	return []string{"<os environment>"}
 }
 
-func (s *envSourcer) Dump() map[string]string {
+func (s *envSourcer) Dump() (map[string]string, error) {
 	values := map[string]string{}
 	for _, name := range getNames() {
 		values[name] = os.Getenv(name)
 	}
 
-	return values
+	return values, nil
 }
 
 func getNames() []string {

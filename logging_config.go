@@ -56,10 +56,13 @@ func (c *loggingConfig) MustLoad(target interface{}, modifiers ...TagModifier) {
 }
 
 func (c *loggingConfig) dumpSource() error {
-	assets := strings.Join(c.Config.Assets(), ", ")
+	dump, err := c.Config.Dump()
+	if err != nil {
+		return err
+	}
 
 	chunk := map[string]interface{}{}
-	for key, value := range c.Config.Dump() {
+	for key, value := range dump {
 		if c.isMasked(key) {
 			chunk[key] = "*****"
 		} else {
@@ -67,7 +70,7 @@ func (c *loggingConfig) dumpSource() error {
 		}
 	}
 
-	c.logger.Printf("Config source assets: %s", assets)
+	c.logger.Printf("Config source assets: %s", strings.Join(c.Config.Assets(), ", "))
 	c.logger.Printf("Config source contents: %s", normalizeChunk(chunk))
 	return nil
 }

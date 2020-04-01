@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/aphistic/sweet"
-	"github.com/aphistic/sweet-junit"
+	junit "github.com/aphistic/sweet-junit"
 	"github.com/fatih/structtag"
 	. "github.com/onsi/gomega"
 )
@@ -27,6 +27,9 @@ func TestMain(m *testing.M) {
 		s.AddSuite(&DisplayTagSetterSuite{})
 		s.AddSuite(&EnvSourcerSuite{})
 		s.AddSuite(&EnvTagPrefixerSuite{})
+		s.AddSuite(&FlagSourcerSuite{})
+		s.AddSuite(&FlagTagPrefixerSuite{})
+		s.AddSuite(&FlagTagSetterSuite{})
 		s.AddSuite(&FileSourcerSuite{})
 		s.AddSuite(&FileTagPrefixerSuite{})
 		s.AddSuite(&FileTagSetterSuite{})

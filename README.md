@@ -93,6 +93,9 @@ A sourcer reads values from a particular source based on a configuration struct'
   <dt>Test Environment Sourcer</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewTestEnvSourcer">test environment sourcer</a> reads the <code>env</code> tag but looks up the corresponding value from a literal map. This sourcer is meant to be used in unit tests where the full construction of a nacelle [process](https://nacelle.dev/docs/core/process) is beneficial.</dd>
 
+  <dt>Flag Sourcer</dt>
+  <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFlagSourcer">flag sourcer</a> reads the <code>flag</code> tag and looks up the corresponding value attached to the process's command line arguments.</dd>
+
   <dt>File Sourcer</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFileSourcer">file sourcer</a> reads the <code>file</code> tag and returns the value at the given path. A filename and a file parser musts be supplied on instantiation. Both <a href="https://godoc.org/github.com/go-nacelle/config#ParseYAML">ParseYAML</a> and <a href="https://godoc.org/github.com/go-nacelle/config#ParseTOML">ParseTOML</a> are supplied file parsers -- note that as JSON is a subset of YAML, <code>ParseYAML</code> will also correctly parse JSON files. If a <code>nil</code> file parser is supplied, one is chosen by the filename extension. A file sourcer will load the file tag <code>api.timeout</code> from the given file by parsing it into a map of values and recursively walking the (keys separated by dots). This can return a primitive type or a structured map, as long as the target field has a compatible type. The constructor <a href="https://godoc.org/github.com/go-nacelle/config#NewOptionalFileSourcer">NewOptionalFileSourcer</a> will return a no-op sourcer if the filename does not exist.</dd>
 
@@ -117,11 +120,17 @@ A tag modifier dynamically alters the tags of a configuration struct. The follow
   <dt>Display Tag Setter</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewDisplayTagSetter">display tag setter</a> sets the <code>display</code> tag to the value of the <code>env</code> tag. This tag modifier can be used to provide sane defaults to the tag without doubling the length of the struct tag definition.</dd>
 
+  <dt>Flag Tag Setter</dt>
+  <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFlagTagSetter">flag tag setter</a> sets the <code>flag</code> tag to the value of the <code>env</code> tag. This tag modifier can be used to provide sane defaults to the tag without doubling the length of the struct tag definition.</dd>
+
   <dt>File Tag Setter</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFileTagSetter">file tag setter</a> sets the <code>file</code> tag to the value of the <code>env</code> tag. This tag modifier can be used to provide sane defaults to the tag without doubling the length of the struct tag definition.</dd>
 
   <dt>Env Tag Prefixer</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewEnvTagPrefixer">environment tag prefixer</a> inserts a prefix on each <code>env</code> tags. This is useful when two distinct instances of the same configuration are required, and each one should be configured independently from the other (for example, using the same abstraction to consume from two different event busses with the same consumer code).</dd>
+
+  <dt>Flag Tag Prefixer</dt>
+  <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFlagTagPrefixer">flag tag prefixer</a> inserts a prefix on each <code>flag</code> tag. This effectively looks in a distinct top-level namespace in the parsed configuration. This is similar to the env tag prefixer.</dd>
 
   <dt>File Tag Prefixer</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFileTagPrefixer">file tag prefixer</a> inserts a prefix on each <code>file</code> tag. This effectively looks in a distinct top-level namespace in the parsed configuration. This is similar to the env tag prefixer.</dd>
