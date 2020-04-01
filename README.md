@@ -91,7 +91,7 @@ A sourcer reads values from a particular source based on a configuration struct'
   <dd>An <a href="https://godoc.org/github.com/go-nacelle/config#NewEnvSourcer">environment sourcer</a> reads the <code>env</code> tag and looks up the corresponding value in the process's environment. An expected prefix may be supplied in order to namespace application configuration from the rest of the system. A sourcer instantiated with <code>NewEnvSourcer("APP")</code> will load the env tag <code>fetch_limit</code> from the environment variable <code>APP_FETCH_LIMIT</code> and falling back to the environment variable <code>FETCH_LIMIT</code>.</dd>
 
   <dt>Test Environment Sourcer</dt>
-  <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewTestEnvSourcer">test environment sourcer</a> reads the <code>env</code> tag but looks up the corresponding value from a literal map. This sourcer can be used in unit tests where the full construction of a nacelle [process](https://nacelle.dev/docs/core/process) is too burdensome.</dd>
+  <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewTestEnvSourcer">test environment sourcer</a> reads the <code>env</code> tag but looks up the corresponding value from a literal map. This sourcer can be used in unit tests where the full construction of a nacelle <a href="https://nacelle.dev/docs/core/process">process</a> is too burdensome.</dd>
 
   <dt>Flag Sourcer</dt>
   <dd>A <a href="https://godoc.org/github.com/go-nacelle/config#NewFlagSourcer">flag sourcer</a> reads the <code>flag</code> tag and looks up the corresponding value attached to the process's command line arguments.</dd>
