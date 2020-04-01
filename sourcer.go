@@ -6,6 +6,11 @@ type (
 	// per variable, or a cache of variables can be built on startup and then
 	// pulled from a cached mapping as requested.
 	Sourcer interface {
+		// Init is a hook for certain classes of sourcers to read and normalize
+		// the source data. This gives a canonical place where external errors
+		// can occur that are not directly related to validation.
+		Init() error
+
 		// Tags returns a list of tags which are required to get a value from
 		// the source. Order matters.
 		Tags() []string
@@ -25,7 +30,7 @@ type (
 		// Dump returns the full content of the sourcer. This is used by the
 		// logging package to show the content of the environment and config
 		// files when a value is missing or otherwise illegal.
-		Dump() (map[string]string, error)
+		Dump() map[string]string
 	}
 
 	SourcerFlag int

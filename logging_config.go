@@ -56,13 +56,8 @@ func (c *loggingConfig) MustLoad(target interface{}, modifiers ...TagModifier) {
 }
 
 func (c *loggingConfig) dumpSource() error {
-	dump, err := c.Config.Dump()
-	if err != nil {
-		return err
-	}
-
 	chunk := map[string]interface{}{}
-	for key, value := range dump {
+	for key, value := range c.Config.Dump() {
 		if c.isMasked(key) {
 			chunk[key] = "*****"
 		} else {

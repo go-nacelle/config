@@ -11,6 +11,10 @@ type (
 	// Config is a structure that can populate the exported fields of a
 	// struct based on the value of the field `env` tags.
 	Config interface {
+		// Init prepares state required by the registered sourcer. This
+		// method should be called before calling any other method.
+		Init() error
+
 		// Load populates a configuration object. The given tag modifiers
 		// are applied to the configuration object pre-load. If the target
 		// value conforms to the PostLoadConfig interface, the PostLoad
@@ -29,7 +33,7 @@ type (
 		// is used by the logging package to show the content of the
 		// environment and config files when a value is missing or otherwise
 		// illegal.
-		Dump() (map[string]string, error)
+		Dump() map[string]string
 	}
 
 	// PostLoadConfig is a marker interface for configuration objects
@@ -50,6 +54,10 @@ func NewConfig(sourcer Sourcer) Config {
 	return &config{
 		sourcer: sourcer,
 	}
+}
+
+func (c *config) Init() error {
+	return c.sourcer.Init()
 }
 
 func (c *config) Load(target interface{}, modifiers ...TagModifier) error {
@@ -89,7 +97,7 @@ func (c *config) Assets() []string {
 	return c.sourcer.Assets()
 }
 
-func (c *config) Dump() (map[string]string, error) {
+func (c *config) Dump() map[string]string {
 	return c.sourcer.Dump()
 }
 

@@ -10,6 +10,7 @@ type DirectorySourcerSuite struct{}
 
 func (s *DirectorySourcerSuite) TestLoadJSON(t sweet.T) {
 	sourcer := NewDirectorySourcer("test-files/dir", nil)
+	Expect(sourcer.Init()).To(BeNil())
 
 	ensureEquals(sourcer, []string{"a"}, "1")
 	ensureEquals(sourcer, []string{"b"}, "10")
@@ -47,6 +48,7 @@ func (s *DirectorySourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 	}`), nil)
 
 	sourcer := NewDirectorySourcer("test-files/dir", nil, WithDirectorySourcerFS((fs)))
+	Expect(sourcer.Init()).To(BeNil())
 
 	ensureEquals(sourcer, []string{"a"}, "1")
 	ensureEquals(sourcer, []string{"b"}, "10")
@@ -64,20 +66,18 @@ func (s *DirectorySourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 }
 
 func (s *DirectorySourcerSuite) TestOptionalDirectorySourcer(t sweet.T) {
-	ensureMissing(
-		NewOptionalDirectorySourcer("test-files/no-such-directory", nil),
-		[]string{"foo"},
-	)
+	sourcer := NewOptionalDirectorySourcer("test-files/no-such-directory", nil)
+	Expect(sourcer.Init()).To(BeNil())
+	ensureMissing(sourcer, []string{"foo"})
 }
 
 func (s *DirectorySourcerSuite) TestOptionalDirectorySourcerWithFakeFS(t sweet.T) {
 	fs := NewMockFileSystem()
 	fs.ExistsFunc.SetDefaultReturn(false, nil)
 
-	ensureMissing(
-		NewOptionalDirectorySourcer("test-files/no-such-directory", nil, WithDirectorySourcerFS(fs)),
-		[]string{"foo"},
-	)
+	sourcer := NewOptionalDirectorySourcer("test-files/no-such-directory", nil, WithDirectorySourcerFS(fs))
+	Expect(sourcer.Init()).To(BeNil())
 
+	ensureMissing(sourcer, []string{"foo"})
 	Expect(fs.ExistsFunc).To(BeCalledOnceWith("test-files/no-such-directory"))
 }

@@ -9,26 +9,38 @@ import (
 type FileSourcerSuite struct{}
 
 func (s *FileSourcerSuite) TestLoadJSON(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.json", ParseYAML))
+	sourcer := NewFileSourcer("test-files/values.json", ParseYAML)
+	Expect(sourcer.Init()).To(BeNil())
+	testFileSourcer(sourcer)
 }
 
 func (s *FileSourcerSuite) TestLoadJSONNoParser(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.json", nil))
+	sourcer := NewFileSourcer("test-files/values.json", nil)
+	Expect(sourcer.Init()).To(BeNil())
+	testFileSourcer(sourcer)
 }
 
 func (s *FileSourcerSuite) TestLoadYAML(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.yaml", ParseYAML))
+	sourcer := NewFileSourcer("test-files/values.yaml", ParseYAML)
+	Expect(sourcer.Init()).To(BeNil())
+	testFileSourcer(sourcer)
 }
 func (s *FileSourcerSuite) TestLoadYAMLNoParser(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.yaml", nil))
+	sourcer := NewFileSourcer("test-files/values.yaml", nil)
+	Expect(sourcer.Init()).To(BeNil())
+	testFileSourcer(sourcer)
 }
 
 func (s *FileSourcerSuite) TestLoadTOML(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.toml", ParseTOML))
+	sourcer := NewFileSourcer("test-files/values.toml", ParseTOML)
+	Expect(sourcer.Init()).To(BeNil())
+	testFileSourcer(sourcer)
 }
 
 func (s *FileSourcerSuite) TestLoadTOMLNoParser(t sweet.T) {
-	testFileSourcer(NewFileSourcer("test-files/values.toml", nil))
+	sourcer := NewFileSourcer("test-files/values.toml", nil)
+	Expect(sourcer.Init()).To(BeNil())
+	testFileSourcer(sourcer)
 }
 
 func (s *FileSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
@@ -50,31 +62,32 @@ func (s *FileSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 		}
 	}`), nil)
 
-	testFileSourcer(NewFileSourcer("test-files/values.json", ParseYAML, WithFileSourcerFS(fs)))
+	sourcer := NewFileSourcer("test-files/values.json", ParseYAML, WithFileSourcerFS(fs))
+	Expect(sourcer.Init()).To(BeNil())
+
+	testFileSourcer(sourcer)
 	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/values.json"))
 }
 
 func (s *FileSourcerSuite) TestOptionalFileSourcer(t sweet.T) {
-	ensureMissing(
-		NewOptionalFileSourcer("test-files/no-such-file.json", nil),
-		[]string{"foo"},
-	)
+	sourcer := NewOptionalFileSourcer("test-files/no-such-file.json", nil)
+	Expect(sourcer.Init()).To(BeNil())
+	ensureMissing(sourcer, []string{"foo"})
 }
 
 func (s *FileSourcerSuite) TestOptionalFileSourcerWithFakeFS(t sweet.T) {
 	fs := NewMockFileSystem()
 	fs.ExistsFunc.SetDefaultReturn(false, nil)
+	sourcer := NewOptionalFileSourcer("test-files/no-such-file.json", nil, WithFileSourcerFS(fs))
+	Expect(sourcer.Init()).To(BeNil())
 
-	ensureMissing(
-		NewOptionalFileSourcer("test-files/no-such-file.json", nil, WithFileSourcerFS(fs)),
-		[]string{"foo"},
-	)
-
+	ensureMissing(sourcer, []string{"foo"})
 	Expect(fs.ExistsFunc).To(BeCalledOnceWith("test-files/no-such-file.json"))
 }
 
 func (s *FileSourcerSuite) TestDump(t sweet.T) {
 	sourcer := NewOptionalFileSourcer("test-files/values.json", ParseYAML)
+	Expect(sourcer.Init()).To(BeNil())
 
 	Expect(sourcer.Dump()).To(Equal(map[string]string{
 		"foo":     `bar`,

@@ -14,6 +14,8 @@ func (s *TestEnvSourcerSuite) TestUnprefixed(t sweet.T) {
 	}
 
 	sourcer := NewTestEnvSourcer(values)
+	Expect(sourcer.Init()).To(BeNil())
+
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"Y"})
 	Expect(val1).To(Equal("foo"))
@@ -27,6 +29,8 @@ func (s *TestEnvSourcerSuite) TestNormalizedCasing(t sweet.T) {
 	}
 
 	sourcer := NewTestEnvSourcer(values)
+	Expect(sourcer.Init()).To(BeNil())
+
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"y"})
 	Expect(val1).To(Equal("foo"))
@@ -39,8 +43,10 @@ func (s *TestEnvSourcerSuite) TestDump(t sweet.T) {
 		"Y": "123",
 	}
 
-	dump, err := NewTestEnvSourcer(values).Dump()
-	Expect(err).To(BeNil())
+	sourcer := NewTestEnvSourcer(values)
+	Expect(sourcer.Init()).To(BeNil())
+
+	dump := sourcer.Dump()
 	Expect(dump["X"]).To(Equal("foo"))
 	Expect(dump["Y"]).To(Equal("123"))
 }

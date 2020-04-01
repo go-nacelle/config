@@ -13,6 +13,9 @@ import (
 type (
 	fileSourcer struct {
 		filename string
+		parser   FileParser
+		fs       FileSystem
+		optional bool
 		values   map[string]string
 	}
 
@@ -28,21 +31,15 @@ var parserMap = map[string]FileParser{
 	".toml": ParseTOML,
 }
 
-// NewOptionalFileSourcer creates a file sourcer if the provided file exists. If
-// the provided file is not found, a sourcer is returned returns no values.
+// NewOptionalFileSourcer creates a file sourcer that does not error on init
+// if the file does not exist. The underlying sourcer returns no values.
 func NewOptionalFileSourcer(filename string, parser FileParser, configs ...FileSourcerConfigFunc) Sourcer {
-	options := getFileSourcerConfigOptions(configs)
-
-	exists, err := options.fs.Exists(filename)
-	if err != nil {
-		return newErrorSourcer(err)
+	return &fileSourcer{
+		filename: filename,
+		parser:   parser,
+		fs:       getFileSourcerConfigOptions(configs).fs,
+		optional: true,
 	}
-
-	if !exists {
-		return &fileSourcer{values: map[string]string{}}
-	}
-
-	return NewFileSourcer(filename, parser, configs...)
 }
 
 // NewFileSourcer creates a sourcer that reads content from a file. The format
@@ -51,22 +48,37 @@ func NewOptionalFileSourcer(filename string, parser FileParser, configs ...FileS
 // parser is supplied, one will be selected based on the extension of the file.
 // JSON, YAML, and TOML files are supported.
 func NewFileSourcer(filename string, parser FileParser, configs ...FileSourcerConfigFunc) Sourcer {
-	options := getFileSourcerConfigOptions(configs)
+	return &fileSourcer{
+		filename: filename,
+		parser:   parser,
+		fs:       getFileSourcerConfigOptions(configs).fs,
+	}
+}
 
-	values, err := readFile(filename, options.fs, parser)
+func (s *fileSourcer) Init() error {
+	if s.optional {
+		exists, err := s.fs.Exists(s.filename)
+		if err != nil || !exists {
+			return err
+		}
+
+		if !exists {
+			return nil
+		}
+	}
+
+	values, err := readFile(s.filename, s.fs, s.parser)
 	if err != nil {
-		return newErrorSourcer(err)
+		return err
 	}
 
 	jsonValues, err := serializeJSONValues(values)
 	if err != nil {
-		return newErrorSourcer(err)
+		return err
 	}
 
-	return &fileSourcer{
-		filename: filename,
-		values:   jsonValues,
-	}
+	s.values = jsonValues
+	return nil
 }
 
 func (s *fileSourcer) Tags() []string {
@@ -93,8 +105,8 @@ func (s *fileSourcer) Assets() []string {
 	return []string{s.filename}
 }
 
-func (s *fileSourcer) Dump() (map[string]string, error) {
-	return s.values, nil
+func (s *fileSourcer) Dump() map[string]string {
+	return s.values
 }
 
 //

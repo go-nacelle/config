@@ -30,10 +30,12 @@ func (s *MultiSourcerSuite) TestMultiSourcerBasic(t sweet.T) {
 		return "", FlagMissing, nil
 	})
 
-	multi := NewMultiSourcer(s2, s1)
-	ensureEquals(multi, []string{"foo"}, "bar")
-	ensureEquals(multi, []string{"bar"}, "baz")
-	ensureMissing(multi, []string{"baz"})
+	sourcer := NewMultiSourcer(s2, s1)
+	Expect(sourcer.Init()).To(BeNil())
+
+	ensureEquals(sourcer, []string{"foo"}, "bar")
+	ensureEquals(sourcer, []string{"bar"}, "baz")
+	ensureMissing(sourcer, []string{"baz"})
 }
 
 func (s *MultiSourcerSuite) TestMultiSourcerPriority(t sweet.T) {
@@ -44,8 +46,9 @@ func (s *MultiSourcerSuite) TestMultiSourcerPriority(t sweet.T) {
 	s1.GetFunc.SetDefaultReturn("bar", FlagFound, nil)
 	s2.GetFunc.SetDefaultReturn("baz", FlagFound, nil)
 
-	multi := NewMultiSourcer(s2, s1)
-	ensureEquals(multi, []string{"foo"}, "bar")
+	sourcer := NewMultiSourcer(s2, s1)
+	Expect(sourcer.Init()).To(BeNil())
+	ensureEquals(sourcer, []string{"foo"}, "bar")
 }
 
 func (s *MultiSourcerSuite) TestMultiSourcerTags(t sweet.T) {
@@ -60,8 +63,10 @@ func (s *MultiSourcerSuite) TestMultiSourcerTags(t sweet.T) {
 	s4.TagsFunc.SetDefaultReturn([]string{"a", "b", "d"})
 	s5.TagsFunc.SetDefaultReturn([]string{"e"})
 
-	multi := NewMultiSourcer(s5, s4, s3, s2, s1)
-	tags := multi.Tags()
+	sourcer := NewMultiSourcer(s5, s4, s3, s2, s1)
+	Expect(sourcer.Init()).To(BeNil())
+
+	tags := sourcer.Tags()
 	Expect(tags).To(HaveLen(5))
 	Expect(tags).To(ConsistOf("a", "b", "c", "d", "e"))
 }
@@ -77,8 +82,10 @@ func (s *MultiSourcerSuite) TestMultiSourcerDifferentTags(t sweet.T) {
 	s2.GetFunc.SetDefaultReturn("", FlagSkip, nil)
 	s3.GetFunc.SetDefaultReturn("", FlagMissing, nil)
 
-	multi := NewMultiSourcer(s3, s2, s1)
-	_, flag, err := multi.Get([]string{"foo", "bar"})
+	sourcer := NewMultiSourcer(s3, s2, s1)
+	Expect(sourcer.Init()).To(BeNil())
+
+	_, flag, err := sourcer.Get([]string{"foo", "bar"})
 	Expect(err).To(BeNil())
 	Expect(flag).To(Equal(FlagMissing))
 	Expect(s1.GetFunc).To(BeCalledOnceWith([]string{"foo"}))
@@ -98,8 +105,10 @@ func (s *MultiSourcerSuite) TestMultiSourceSkip(t sweet.T) {
 	s2.GetFunc.SetDefaultReturn("", FlagSkip, nil)
 	s3.GetFunc.SetDefaultReturn("", FlagSkip, nil)
 
-	multi := NewMultiSourcer(s3, s2, s1)
-	_, flag, err := multi.Get([]string{"", ""})
+	sourcer := NewMultiSourcer(s3, s2, s1)
+	Expect(sourcer.Init()).To(BeNil())
+
+	_, flag, err := sourcer.Get([]string{"", ""})
 	Expect(err).To(BeNil())
 	Expect(flag).To(Equal(FlagSkip))
 }
@@ -108,13 +117,14 @@ func (s *MultiSourcerSuite) TestDump(t sweet.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s3 := NewMockSourcer()
-	s1.DumpFunc.SetDefaultReturn(map[string]string{"a": "foo"}, nil)
-	s2.DumpFunc.SetDefaultReturn(map[string]string{"b": "bar", "a": "bonk"}, nil)
-	s3.DumpFunc.SetDefaultReturn(map[string]string{"c": "baz"}, nil)
+	s1.DumpFunc.SetDefaultReturn(map[string]string{"a": "foo"})
+	s2.DumpFunc.SetDefaultReturn(map[string]string{"b": "bar", "a": "bonk"})
+	s3.DumpFunc.SetDefaultReturn(map[string]string{"c": "baz"})
 
-	dump, err := NewMultiSourcer(s3, s2, s1).Dump()
-	Expect(err).To(BeNil())
-	Expect(dump).To(Equal(map[string]string{
+	sourcer := NewMultiSourcer(s3, s2, s1)
+	Expect(sourcer.Init()).To(BeNil())
+
+	Expect(sourcer.Dump()).To(Equal(map[string]string{
 		"a": "bonk",
 		"b": "bar",
 		"c": "baz",
