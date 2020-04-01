@@ -19,6 +19,8 @@ type (
 	FileParser func(content []byte) (map[string]interface{}, error)
 )
 
+var _ Sourcer = &fileSourcer{}
+
 var parserMap = map[string]FileParser{
 	".yaml": ParseYAML,
 	".yml":  ParseYAML,
@@ -91,8 +93,8 @@ func (s *fileSourcer) Assets() []string {
 	return []string{s.filename}
 }
 
-func (s *fileSourcer) Dump() map[string]string {
-	return s.values
+func (s *fileSourcer) Dump() (map[string]string, error) {
+	return s.values, nil
 }
 
 //

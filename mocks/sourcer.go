@@ -7,8 +7,9 @@
 package mocks
 
 import (
-	config "github.com/go-nacelle/config"
 	"sync"
+
+	config "github.com/go-nacelle/config"
 )
 
 // MockSourcer is a mock implementation of the Sourcer interface (from the
@@ -184,7 +185,7 @@ type SourcerDumpFunc struct {
 
 // Dump delegates to the next hook function in the queue and stores the
 // parameter and result values of this invocation.
-func (m *MockSourcer) Dump() map[string]string {
+func (m *MockSourcer) Dump() (map[string]string, error) {
 	r0 := m.DumpFunc.nextHook()()
 	m.DumpFunc.appendCall(SourcerDumpFuncCall{r0})
 	return r0

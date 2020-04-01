@@ -7,8 +7,9 @@
 package mocks
 
 import (
-	config "github.com/go-nacelle/config"
 	"sync"
+
+	config "github.com/go-nacelle/config"
 )
 
 // MockConfig is a mock implementation of the Config interface (from the
@@ -184,7 +185,7 @@ type ConfigDumpFunc struct {
 
 // Dump delegates to the next hook function in the queue and stores the
 // parameter and result values of this invocation.
-func (m *MockConfig) Dump() map[string]string {
+func (m *MockConfig) Dump() (map[string]string, error) {
 	r0 := m.DumpFunc.nextHook()()
 	m.DumpFunc.appendCall(ConfigDumpFuncCall{r0})
 	return r0
