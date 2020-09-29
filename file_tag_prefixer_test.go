@@ -1,28 +1,19 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type FileTagPrefixerSuite struct{}
-
-func (s *FileTagPrefixerSuite) TestEnvTagPrefixer(t sweet.T) {
-	obj, err := ApplyTagModifiers(&BasicConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+func TestFileTagPrefixer(t *testing.T) {
+	obj, err := ApplyTagModifiers(&BasicFileConfig{}, NewFileTagPrefixer("foo"))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"file": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }
 
-func (s *FileTagPrefixerSuite) TestEnvTagPrefixerEmbedded(t sweet.T) {
-	obj, err := ApplyTagModifiers(&ParentConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+func TestFileTagPrefixerEmbedded(t *testing.T) {
+	obj, err := ApplyTagModifiers(&ParentFileConfig{}, NewFileTagPrefixer("foo"))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"file": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }

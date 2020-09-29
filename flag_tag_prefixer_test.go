@@ -1,28 +1,19 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type FlagTagPrefixerSuite struct{}
-
-func (s *FlagTagPrefixerSuite) TestEnvTagPrefixer(t sweet.T) {
-	obj, err := ApplyTagModifiers(&BasicConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+func TestFlagTagPrefixer(t *testing.T) {
+	obj, err := ApplyTagModifiers(&BasicFlagConfig{}, NewFlagTagPrefixer("foo"))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"flag": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }
 
-func (s *FlagTagPrefixerSuite) TestEnvTagPrefixerEmbedded(t sweet.T) {
-	obj, err := ApplyTagModifiers(&ParentConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+func TestFlagTagPrefixerEmbedded(t *testing.T) {
+	obj, err := ApplyTagModifiers(&ParentFlagConfig{}, NewFlagTagPrefixer("foo"))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"flag": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }

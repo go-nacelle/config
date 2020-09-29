@@ -11,6 +11,8 @@ type flagTagPrefixer struct {
 	prefix string
 }
 
+var _ TagModifier = &flagTagPrefixer{}
+
 // NewFlagTagPrefixer creates a new TagModifier which adds a prefix to the
 // values of `flag` tags.
 func NewFlagTagPrefixer(prefix string) TagModifier {

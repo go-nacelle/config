@@ -2,21 +2,14 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"strings"
+	"testing"
 	"time"
 
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type ConfigSuite struct{}
-
-func (s *ConfigSuite) SetUpTest(t sweet.T) {
-	os.Clearenv()
-}
-
-func (s *ConfigSuite) TestSimpleConfig(t sweet.T) {
+func TestConfigSimpleConfig(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "foo",
 		"APP_Y": "123",
@@ -24,13 +17,13 @@ func (s *ConfigSuite) TestSimpleConfig(t sweet.T) {
 	}))
 
 	chunk := &TestSimpleConfig{}
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.X).To(Equal("foo"))
-	Expect(chunk.Y).To(Equal(123))
-	Expect(chunk.Z).To(Equal([]string{"bar", "baz", "bonk"}))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, "foo", chunk.X)
+	assert.Equal(t, 123, chunk.Y)
+	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
 }
 
-func (s *ConfigSuite) TestNestedJSONDeserialization(t sweet.T) {
+func TestConfigNestedJSONDeserialization(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app",
 		map[string]string{
 			"APP_P1": `{"v_int": 3, "v_float": 3.14, "v_bool": true}`,
@@ -38,45 +31,33 @@ func (s *ConfigSuite) TestNestedJSONDeserialization(t sweet.T) {
 		}))
 
 	chunk := &TestEmbeddedJSONConfig{}
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.P1).To(Equal(&TestJSONPayload{V1: 3, V2: 3.14, V3: true}))
-	Expect(chunk.P2).To(Equal(&TestJSONPayload{V1: 5, V2: 6.28, V3: false}))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, &TestJSONPayload{V1: 3, V2: 3.14, V3: true}, chunk.P1)
+	assert.Equal(t, &TestJSONPayload{V1: 5, V2: 6.28, V3: false}, chunk.P2)
 }
 
-func (s *ConfigSuite) TestRequired(t sweet.T) {
+func TestConfigRequired(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestRequiredConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"no value supplied for field 'X'" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (no value supplied for field 'X')")
 }
 
-func (s *ConfigSuite) TestRequiredBadTag(t sweet.T) {
+func TestConfigRequiredBadTag(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestBadRequiredConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"field 'X' has an invalid required tag" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (field 'X' has an invalid required tag)")
 }
 
-func (s *ConfigSuite) TestDefault(t sweet.T) {
+func TestConfigDefault(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestDefaultConfig{}
 
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.X).To(Equal("foo"))
-	Expect(chunk.Y).To(Equal([]string{"bar", "baz", "bonk"}))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, "foo", chunk.X)
+	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Y)
 }
 
-func (s *ConfigSuite) TestBadType(t sweet.T) {
+func TestConfigBadType(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "123", // silently converted to string
 		"APP_Y": "foo",
@@ -84,62 +65,40 @@ func (s *ConfigSuite) TestBadType(t sweet.T) {
 	}))
 
 	chunk := &TestSimpleConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"value supplied for field 'Y' cannot be coerced into the expected type" +
-		", " +
-		"value supplied for field 'Z' cannot be coerced into the expected type" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), fmt.Sprintf("failed to load config (%s)", strings.Join([]string{
+		"value supplied for field 'Y' cannot be coerced into the expected type",
+		"value supplied for field 'Z' cannot be coerced into the expected type",
+	}, ", ")))
 }
 
-func (s *ConfigSuite) TestBadDefaultType(t sweet.T) {
+func TestConfigBadDefaultType(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestBadDefaultConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"default value for field 'X' cannot be coerced into the expected type" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (default value for field 'X' cannot be coerced into the expected type)")
 }
 
-func (s *ConfigSuite) TestPostLoadConfig(t sweet.T) {
+func TestConfigPostLoadConfig(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "3",
 	}))
 
 	chunk := &TestPostLoadConfig{}
-	Expect(config.Load(chunk)).To(BeNil())
+	assert.Nil(t, config.Load(chunk))
 
 	config = NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "-4",
 	}))
 
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"X must be positive" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (X must be positive)")
 }
 
-func (s *ConfigSuite) TestUnsettableFields(t sweet.T) {
+func TestConfigUnsettableFields(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestUnsettableConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"field 'x' can not be set" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (field 'x' can not be set)")
 }
 
-func (s *ConfigSuite) TestLoad(t sweet.T) {
+func TestConfigLoad(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "foo",
 		"APP_Y": "123",
@@ -148,13 +107,13 @@ func (s *ConfigSuite) TestLoad(t sweet.T) {
 
 	chunk := &TestSimpleConfig{}
 
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.X).To(Equal("foo"))
-	Expect(chunk.Y).To(Equal(123))
-	Expect(chunk.Z).To(Equal([]string{"bar", "baz", "bonk"}))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, "foo", chunk.X)
+	assert.Equal(t, 123, chunk.Y)
+	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
 }
 
-func (s *ConfigSuite) TestLoadIsomorphicType(t sweet.T) {
+func TestConfigLoadIsomorphicType(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "foo",
 		"APP_Y": "123",
@@ -163,51 +122,40 @@ func (s *ConfigSuite) TestLoadIsomorphicType(t sweet.T) {
 
 	chunk := &TestSimpleConfig{}
 
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.X).To(Equal("foo"))
-	Expect(chunk.Y).To(Equal(123))
-	Expect(chunk.Z).To(Equal([]string{"bar", "baz", "bonk"}))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, "foo", chunk.X)
+	assert.Equal(t, 123, chunk.Y)
+	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
 }
 
-func (s *ConfigSuite) TestLoadPostLoadWithConversion(t sweet.T) {
+func TestConfigLoadPostLoadWithConversion(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_DURATION": "3",
 	}))
 
 	chunk := &TestPostLoadConversion{}
 
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.Duration).To(Equal(time.Second * 3))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
-func (s *ConfigSuite) TestLoadPostLoadWithTags(t sweet.T) {
+func TestConfigLoadPostLoadWithTags(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_FOO_DURATION": "3",
 	}))
 
 	chunk := &TestPostLoadConversion{}
 
-	Expect(config.Load(chunk, NewEnvTagPrefixer("foo"))).To(BeNil())
-	Expect(chunk.Duration).To(Equal(time.Second * 3))
+	assert.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
+	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
-func (s *ConfigSuite) TestBadConfigObjectTypes(t sweet.T) {
-	Expect(NewConfig(NewFakeSourcer("app", nil)).Load(nil)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"configuration target is not a pointer to struct" +
-		")",
-	))
-
-	Expect(NewConfig(NewFakeSourcer("app", nil)).Load("foo")).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"configuration target is not a pointer to struct" +
-		")",
-	))
+func TestConfigBadConfigObjectTypes(t *testing.T) {
+	assert.EqualError(t, NewConfig(NewFakeSourcer("app", nil)).Load(nil), "failed to load config (configuration target is not a pointer to struct)")
+	assert.EqualError(t, NewConfig(NewFakeSourcer("app", nil)).Load("foo"), "failed to load config (configuration target is not a pointer to struct)")
 }
 
-func (s *ConfigSuite) TestEmbeddedConfig(t sweet.T) {
+func TestConfigEmbeddedConfig(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_A": "1",
 		"APP_B": "2",
@@ -218,15 +166,15 @@ func (s *ConfigSuite) TestEmbeddedConfig(t sweet.T) {
 
 	chunk := &TestParentConfig{}
 
-	Expect(config.Load(chunk)).To(BeNil())
-	Expect(chunk.X).To(Equal(4))
-	Expect(chunk.Y).To(Equal(5))
-	Expect(chunk.A).To(Equal(1))
-	Expect(chunk.B).To(Equal(2))
-	Expect(chunk.C).To(Equal(3))
+	assert.Nil(t, config.Load(chunk))
+	assert.Equal(t, 4, chunk.X)
+	assert.Equal(t, 5, chunk.Y)
+	assert.Equal(t, 1, chunk.A)
+	assert.Equal(t, 2, chunk.B)
+	assert.Equal(t, 3, chunk.C)
 }
 
-func (s *ConfigSuite) TestEmbeddedConfigWithTags(t sweet.T) {
+func TestConfigEmbeddedConfigWithTags(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_FOO_A": "1",
 		"APP_FOO_B": "2",
@@ -237,15 +185,15 @@ func (s *ConfigSuite) TestEmbeddedConfigWithTags(t sweet.T) {
 
 	chunk := &TestParentConfig{}
 
-	Expect(config.Load(chunk, NewEnvTagPrefixer("foo"))).To(BeNil())
-	Expect(chunk.X).To(Equal(4))
-	Expect(chunk.Y).To(Equal(5))
-	Expect(chunk.A).To(Equal(1))
-	Expect(chunk.B).To(Equal(2))
-	Expect(chunk.C).To(Equal(3))
+	assert.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
+	assert.Equal(t, 4, chunk.X)
+	assert.Equal(t, 5, chunk.Y)
+	assert.Equal(t, 1, chunk.A)
+	assert.Equal(t, 2, chunk.B)
+	assert.Equal(t, 3, chunk.C)
 }
 
-func (s *ConfigSuite) TestEmbeddedConfigPostLoad(t sweet.T) {
+func TestConfigEmbeddedConfigPostLoad(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_A": "1",
 		"APP_B": "3",
@@ -255,25 +203,13 @@ func (s *ConfigSuite) TestEmbeddedConfigPostLoad(t sweet.T) {
 	}))
 
 	chunk := &TestParentConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"fields must be increasing" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (fields must be increasing)")
 }
 
-func (s *ConfigSuite) TestBadEmbeddedObjectType(t sweet.T) {
+func TestConfigBadEmbeddedObjectType(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestBadParentConfig{}
-
-	Expect(config.Load(chunk)).To(MatchError("" +
-		"failed to load config" +
-		" (" +
-		"invalid embedded type in configuration struct" +
-		")",
-	))
+	assert.EqualError(t, config.Load(chunk), "failed to load config (invalid embedded type in configuration struct)")
 }
 
 //

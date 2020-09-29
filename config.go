@@ -7,47 +7,47 @@ import (
 	"strings"
 )
 
-type (
-	// Config is a structure that can populate the exported fields of a
-	// struct based on the value of the field `env` tags.
-	Config interface {
-		// Init prepares state required by the registered sourcer. This
-		// method should be called before calling any other method.
-		Init() error
+// Config is a structure that can populate the exported fields of a
+// struct based on the value of the field `env` tags.
+type Config interface {
+	// Init prepares state required by the registered sourcer. This
+	// method should be called before calling any other method.
+	Init() error
 
-		// Load populates a configuration object. The given tag modifiers
-		// are applied to the configuration object pre-load. If the target
-		// value conforms to the PostLoadConfig interface, the PostLoad
-		// function may be called multiple times.
-		Load(interface{}, ...TagModifier) error
+	// Load populates a configuration object. The given tag modifiers
+	// are applied to the configuration object pre-load. If the target
+	// value conforms to the PostLoadConfig interface, the PostLoad
+	// function may be called multiple times.
+	Load(interface{}, ...TagModifier) error
 
-		// MustInject calls Injects and panics on error.
-		MustLoad(interface{}, ...TagModifier)
+	// MustInject calls Injects and panics on error.
+	MustLoad(interface{}, ...TagModifier)
 
-		// Assets returns a list of names of assets that compose the
-		// underlying sourcer. This can be a list of matched files that are
-		// read, or a token that denotes a fixed source.
-		Assets() []string
+	// Assets returns a list of names of assets that compose the
+	// underlying sourcer. This can be a list of matched files that are
+	// read, or a token that denotes a fixed source.
+	Assets() []string
 
-		// Dump returns the full content of the underlying sourcer. This
-		// is used by the logging package to show the content of the
-		// environment and config files when a value is missing or otherwise
-		// illegal.
-		Dump() map[string]string
-	}
+	// Dump returns the full content of the underlying sourcer. This
+	// is used by the logging package to show the content of the
+	// environment and config files when a value is missing or otherwise
+	// illegal.
+	Dump() map[string]string
+}
 
-	// PostLoadConfig is a marker interface for configuration objects
-	// which should do some post-processing after being loaded. This
-	// can perform additional casting (e.g. ints to time.Duration) and
-	// more sophisticated validation (e.g. enum or exclusive values).
-	PostLoadConfig interface {
-		PostLoad() error
-	}
+// PostLoadConfig is a marker interface for configuration objects
+// which should do some post-processing after being loaded. This
+// can perform additional casting (e.g. ints to time.Duration) and
+// more sophisticated validation (e.g. enum or exclusive values).
+type PostLoadConfig interface {
+	PostLoad() error
+}
 
-	config struct {
-		sourcer Sourcer
-	}
-)
+type config struct {
+	sourcer Sourcer
+}
+
+var _ Config = &config{}
 
 // NewConfig creates a config loader with the given sourcer.
 func NewConfig(sourcer Sourcer) Config {

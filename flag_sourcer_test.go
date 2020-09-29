@@ -2,40 +2,38 @@ package config
 
 import (
 	"fmt"
+	"testing"
 
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
-type FlagSourcerSuite struct{}
-
-func (s *FlagSourcerSuite) TestGet(t sweet.T) {
+func TestFlagSourcerGet(t *testing.T) {
 	sourcer := NewFlagSourcer(WithFlagSourcerArgs([]string{"-X=foo", "--Y", "123"}))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"Y"})
-	Expect(val1).To(Equal("foo"))
-	Expect(val2).To(Equal("123"))
+	assert.Equal(t, "foo", val1)
+	assert.Equal(t, "123", val2)
 }
 
-func (s *FlagSourcerSuite) TestIllegalFlag(t sweet.T) {
+func TestFlagSourcerIllegalFlag(t *testing.T) {
 	for _, badFlag := range []string{"X", "---X", "-=", "--="} {
 		sourcer := NewFlagSourcer(WithFlagSourcerArgs([]string{badFlag}))
-		Expect(sourcer.Init()).To(MatchError(fmt.Sprintf("illegal flag: %s", badFlag)))
+		assert.EqualError(t, sourcer.Init(), fmt.Sprintf("illegal flag: %s", badFlag))
 	}
 }
 
-func (s *FlagSourcerSuite) TestMissingArgument(t sweet.T) {
+func TestFlagSourcerMissingArgument(t *testing.T) {
 	sourcer := NewFlagSourcer(WithFlagSourcerArgs([]string{"--X"}))
-	Expect(sourcer.Init()).To(MatchError(fmt.Sprintf("flag needs an argument: -X")))
+	assert.EqualError(t, sourcer.Init(), fmt.Sprintf("flag needs an argument: -X"))
 }
 
-func (s *FlagSourcerSuite) TestDump(t sweet.T) {
+func TestFlagSourcerDump(t *testing.T) {
 	sourcer := NewFlagSourcer(WithFlagSourcerArgs([]string{"-X=foo", "--Y", "123"}))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	dump := sourcer.Dump()
-	Expect(dump["X"]).To(Equal("foo"))
-	Expect(dump["Y"]).To(Equal("123"))
+	assert.Equal(t, "foo", dump["X"])
+	assert.Equal(t, "123", dump["Y"])
 }

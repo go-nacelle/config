@@ -11,6 +11,8 @@ type fileTagPrefixer struct {
 	prefix string
 }
 
+var _ TagModifier = &fileTagPrefixer{}
+
 // NewFileTagPrefixer creates a new TagModifier which adds a prefix to the
 // values of `file` tags. This can be used to register one config multiple
 // times and have their initialization be read from different keys in a

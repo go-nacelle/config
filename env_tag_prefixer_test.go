@@ -1,28 +1,19 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type EnvTagPrefixerSuite struct{}
-
-func (s *EnvTagPrefixerSuite) TestEnvTagPrefixer(t sweet.T) {
+func TestEnvTagPrefixer(t *testing.T) {
 	obj, err := ApplyTagModifiers(&BasicConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }
 
-func (s *EnvTagPrefixerSuite) TestEnvTagPrefixerEmbedded(t sweet.T) {
+func TestEnvTagPrefixerEmbedded(t *testing.T) {
 	obj, err := ApplyTagModifiers(&ParentConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }

@@ -1,42 +1,29 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type FlagTagSetterSuite struct{}
-
-func (s *FlagTagSetterSuite) TestFlagTagSetter(t sweet.T) {
+func TestFlagTagSetter(t *testing.T) {
 	obj, err := ApplyTagModifiers(
 		&BasicConfig{},
 		NewFlagTagSetter(),
 	)
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"flag":    "a",
-		"default": "q",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{}))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "flag": "a", "default": "q"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }
 
-func (s *FlagTagSetterSuite) TestFlagTagSetterEmbedded(t sweet.T) {
+func TestFlagTagSetterEmbedded(t *testing.T) {
 	obj, err := ApplyTagModifiers(
 		&ParentConfig{},
 		NewFlagTagSetter(),
 	)
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"flag":    "a",
-		"default": "q",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{}))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "flag": "a", "default": "q"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }

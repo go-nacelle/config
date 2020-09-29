@@ -11,6 +11,8 @@ type defaultTagSetter struct {
 	defaultValue string
 }
 
+var _ TagModifier = &defaultTagSetter{}
+
 // NewDefaultTagSetter creates a new TagModifier which sets the value of
 // the default tag for a particular field. This is used to change the default
 // values provided by third party libraries (for which a source change would

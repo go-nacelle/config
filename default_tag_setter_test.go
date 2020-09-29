@@ -1,46 +1,31 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type DefaultTagSetterSuite struct{}
-
-func (s *DefaultTagSetterSuite) TestDefaultTagSetter(t sweet.T) {
+func TestDefaultTagSetter(t *testing.T) {
 	obj, err := ApplyTagModifiers(
 		&BasicConfig{},
 		NewDefaultTagSetter("X", "r"),
 		NewDefaultTagSetter("Y", "null"),
 	)
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"default": "r",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{
-		"default": "null",
-	}))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }
 
-func (s *DefaultTagSetterSuite) TestDefaultTagSetterEmbedded(t sweet.T) {
+func TestDefaultTagSetterEmbedded(t *testing.T) {
 	obj, err := ApplyTagModifiers(
 		&ParentConfig{},
 		NewDefaultTagSetter("X", "r"),
 		NewDefaultTagSetter("Y", "null"),
 	)
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"default": "r",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{
-		"default": "null",
-	}))
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }

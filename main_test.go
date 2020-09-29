@@ -6,62 +6,37 @@ package config
 //go:generate go-mockgen -f github.com/go-nacelle/config -i FileSystem -o fs_mock_test.go
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
-	"github.com/aphistic/sweet"
-	junit "github.com/aphistic/sweet-junit"
 	"github.com/fatih/structtag"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
-	RegisterFailHandler(sweet.GomegaFail)
-
-	sweet.Run(m, func(s *sweet.S) {
-		s.RegisterPlugin(junit.NewPlugin())
-
-		s.AddSuite(&ConfigSuite{})
-		s.AddSuite(&DefaultTagSetterSuite{})
-		s.AddSuite(&DirectorySourcerSuite{})
-		s.AddSuite(&DisplayTagSetterSuite{})
-		s.AddSuite(&EnvSourcerSuite{})
-		s.AddSuite(&EnvTagPrefixerSuite{})
-		s.AddSuite(&FlagSourcerSuite{})
-		s.AddSuite(&FlagTagPrefixerSuite{})
-		s.AddSuite(&FlagTagSetterSuite{})
-		s.AddSuite(&FileSourcerSuite{})
-		s.AddSuite(&FileTagPrefixerSuite{})
-		s.AddSuite(&FileTagSetterSuite{})
-		s.AddSuite(&GlobSourcerSuite{})
-		s.AddSuite(&JSONSuite{})
-		s.AddSuite(&LoggingConfigSuite{})
-		s.AddSuite(&MultiSourcerSuite{})
-		s.AddSuite(&TestEnvSourcerSuite{})
-	})
+	os.Clearenv()
+	os.Exit(m.Run())
 }
 
-//
-//
-
-func ensureEquals(sourcer Sourcer, values []string, expected string) {
+func ensureEquals(t *testing.T, sourcer Sourcer, values []string, expected string) {
 	val, flag, err := sourcer.Get(values)
-	Expect(err).To(BeNil())
-	Expect(flag).To(Equal(FlagFound))
-	Expect(val).To(Equal(expected))
+	assert.Nil(t, err)
+	assert.Equal(t, FlagFound, flag)
+	assert.Equal(t, expected, val)
 }
 
-func ensureMatches(sourcer Sourcer, values []string, expected string) {
+func ensureMatches(t *testing.T, sourcer Sourcer, values []string, expected string) {
 	val, flag, err := sourcer.Get(values)
-	Expect(err).To(BeNil())
-	Expect(flag).To(Equal(FlagFound))
-	Expect(val).To(MatchJSON(expected))
+	assert.Nil(t, err)
+	assert.Equal(t, FlagFound, flag)
+	assert.JSONEq(t, expected, val)
 }
 
-func ensureMissing(sourcer Sourcer, values []string) {
+func ensureMissing(t *testing.T, sourcer Sourcer, values []string) {
 	_, flag, err := sourcer.Get(values)
-	Expect(err).To(BeNil())
-	Expect(flag).To(Equal(FlagMissing))
+	assert.Nil(t, err)
+	assert.Equal(t, FlagMissing, flag)
 }
 
 func gatherTags(obj interface{}, name string) map[string]string {

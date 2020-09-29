@@ -1,52 +1,51 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type TestEnvSourcerSuite struct{}
-
-func (s *TestEnvSourcerSuite) TestUnprefixed(t sweet.T) {
+func TestTestEnvSourcerUnprefixed(t *testing.T) {
 	values := map[string]string{
 		"X": "foo",
 		"Y": "123",
 	}
 
 	sourcer := NewTestEnvSourcer(values)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"Y"})
-	Expect(val1).To(Equal("foo"))
-	Expect(val2).To(Equal("123"))
+	assert.Equal(t, "foo", val1)
+	assert.Equal(t, "123", val2)
 }
 
-func (s *TestEnvSourcerSuite) TestNormalizedCasing(t sweet.T) {
+func TestTestEnvSourcerNormalizedCasing(t *testing.T) {
 	values := map[string]string{
 		"x": "foo",
 		"y": "123",
 	}
 
 	sourcer := NewTestEnvSourcer(values)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"y"})
-	Expect(val1).To(Equal("foo"))
-	Expect(val2).To(Equal("123"))
+	assert.Equal(t, "foo", val1)
+	assert.Equal(t, "123", val2)
 }
 
-func (s *TestEnvSourcerSuite) TestDump(t sweet.T) {
+func TestTestEnvSourcerDump(t *testing.T) {
 	values := map[string]string{
 		"X": "foo",
 		"Y": "123",
 	}
 
 	sourcer := NewTestEnvSourcer(values)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	dump := sourcer.Dump()
-	Expect(dump["X"]).To(Equal("foo"))
-	Expect(dump["Y"]).To(Equal("123"))
+	assert.Equal(t, "foo", dump["X"])
+	assert.Equal(t, "123", dump["Y"])
 }

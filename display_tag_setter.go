@@ -8,6 +8,8 @@ import (
 
 type displayTagSetter struct{}
 
+var _ TagModifier = &displayTagSetter{}
+
 // NewDisplayTagSetter creates a new TagModifier which sets the value
 // of the display tag to be the same as the env tag.
 func NewDisplayTagSetter() TagModifier {

@@ -1,28 +1,27 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/efritz/go-mockgen/matchers"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	mockassert "github.com/efritz/go-mockgen/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-type DirectorySourcerSuite struct{}
-
-func (s *DirectorySourcerSuite) TestLoadJSON(t sweet.T) {
+func TestDirectorySourcerLoadJSON(t *testing.T) {
 	sourcer := NewDirectorySourcer("test-files/dir", nil)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	ensureEquals(sourcer, []string{"a"}, "1")
-	ensureEquals(sourcer, []string{"b"}, "10")
-	ensureEquals(sourcer, []string{"c"}, "100")
-	ensureEquals(sourcer, []string{"d"}, "200")
-	ensureEquals(sourcer, []string{"e"}, "300")
-	ensureEquals(sourcer, []string{"x"}, "7")
-	ensureEquals(sourcer, []string{"y"}, "8")
-	ensureEquals(sourcer, []string{"z"}, "9")
+	ensureEquals(t, sourcer, []string{"a"}, "1")
+	ensureEquals(t, sourcer, []string{"b"}, "10")
+	ensureEquals(t, sourcer, []string{"c"}, "100")
+	ensureEquals(t, sourcer, []string{"d"}, "200")
+	ensureEquals(t, sourcer, []string{"e"}, "300")
+	ensureEquals(t, sourcer, []string{"x"}, "7")
+	ensureEquals(t, sourcer, []string{"y"}, "8")
+	ensureEquals(t, sourcer, []string{"z"}, "9")
 }
 
-func (s *DirectorySourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
+func TestDirectorySourcerLoadJSONWithFakeFS(t *testing.T) {
 	fs := NewMockFileSystem()
 	fs.ListFilesFunc.SetDefaultReturn([]string{"a.json", "b.json", "c.json"}, nil)
 
@@ -48,36 +47,46 @@ func (s *DirectorySourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 	}`), nil)
 
 	sourcer := NewDirectorySourcer("test-files/dir", nil, WithDirectorySourcerFS((fs)))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	ensureEquals(sourcer, []string{"a"}, "1")
-	ensureEquals(sourcer, []string{"b"}, "10")
-	ensureEquals(sourcer, []string{"c"}, "100")
-	ensureEquals(sourcer, []string{"d"}, "200")
-	ensureEquals(sourcer, []string{"e"}, "300")
-	ensureEquals(sourcer, []string{"x"}, "7")
-	ensureEquals(sourcer, []string{"y"}, "8")
-	ensureEquals(sourcer, []string{"z"}, "9")
+	ensureEquals(t, sourcer, []string{"a"}, "1")
+	ensureEquals(t, sourcer, []string{"b"}, "10")
+	ensureEquals(t, sourcer, []string{"c"}, "100")
+	ensureEquals(t, sourcer, []string{"d"}, "200")
+	ensureEquals(t, sourcer, []string{"e"}, "300")
+	ensureEquals(t, sourcer, []string{"x"}, "7")
+	ensureEquals(t, sourcer, []string{"y"}, "8")
+	ensureEquals(t, sourcer, []string{"z"}, "9")
 
-	Expect(fs.ListFilesFunc).To(BeCalledOnceWith("test-files/dir"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/a.json"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/b.json"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/c.json"))
+	mockassert.CalledOnceMatching(t, fs.ListFilesFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemListFilesFuncCall).Arg0 == "test-files/dir" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/a.json" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/b.json" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/c.json" // TODO - ergonomics
+	})
 }
 
-func (s *DirectorySourcerSuite) TestOptionalDirectorySourcer(t sweet.T) {
+func TestOptionalDirectorySourcer(t *testing.T) {
 	sourcer := NewOptionalDirectorySourcer("test-files/no-such-directory", nil)
-	Expect(sourcer.Init()).To(BeNil())
-	ensureMissing(sourcer, []string{"foo"})
+	assert.Nil(t, sourcer.Init())
+	ensureMissing(t, sourcer, []string{"foo"})
 }
 
-func (s *DirectorySourcerSuite) TestOptionalDirectorySourcerWithFakeFS(t sweet.T) {
+func TestOptionalDirectorySourcerWithFakeFS(t *testing.T) {
 	fs := NewMockFileSystem()
 	fs.ExistsFunc.SetDefaultReturn(false, nil)
 
 	sourcer := NewOptionalDirectorySourcer("test-files/no-such-directory", nil, WithDirectorySourcerFS(fs))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	ensureMissing(sourcer, []string{"foo"})
-	Expect(fs.ExistsFunc).To(BeCalledOnceWith("test-files/no-such-directory"))
+	ensureMissing(t, sourcer, []string{"foo"})
+	mockassert.CalledOnceMatching(t, fs.ExistsFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemExistsFuncCall).Arg0 == "test-files/no-such-directory" // TODO - ergonomics
+	})
 }

@@ -1,49 +1,48 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/efritz/go-mockgen/matchers"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	mockassert "github.com/efritz/go-mockgen/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-type FileSourcerSuite struct{}
-
-func (s *FileSourcerSuite) TestLoadJSON(t sweet.T) {
+func TestFileSourcerLoadJSON(t *testing.T) {
 	sourcer := NewFileSourcer("test-files/values.json", ParseYAML)
-	Expect(sourcer.Init()).To(BeNil())
-	testFileSourcer(sourcer)
+	assert.Nil(t, sourcer.Init())
+	testFileSourcer(t, sourcer)
 }
 
-func (s *FileSourcerSuite) TestLoadJSONNoParser(t sweet.T) {
+func TestFileSourcerLoadJSONNoParser(t *testing.T) {
 	sourcer := NewFileSourcer("test-files/values.json", nil)
-	Expect(sourcer.Init()).To(BeNil())
-	testFileSourcer(sourcer)
+	assert.Nil(t, sourcer.Init())
+	testFileSourcer(t, sourcer)
 }
 
-func (s *FileSourcerSuite) TestLoadYAML(t sweet.T) {
+func TestFileSourcerLoadYAML(t *testing.T) {
 	sourcer := NewFileSourcer("test-files/values.yaml", ParseYAML)
-	Expect(sourcer.Init()).To(BeNil())
-	testFileSourcer(sourcer)
+	assert.Nil(t, sourcer.Init())
+	testFileSourcer(t, sourcer)
 }
-func (s *FileSourcerSuite) TestLoadYAMLNoParser(t sweet.T) {
+func TestFileSourcerLoadYAMLNoParser(t *testing.T) {
 	sourcer := NewFileSourcer("test-files/values.yaml", nil)
-	Expect(sourcer.Init()).To(BeNil())
-	testFileSourcer(sourcer)
+	assert.Nil(t, sourcer.Init())
+	testFileSourcer(t, sourcer)
 }
 
-func (s *FileSourcerSuite) TestLoadTOML(t sweet.T) {
+func TestFileSourcerLoadTOML(t *testing.T) {
 	sourcer := NewFileSourcer("test-files/values.toml", ParseTOML)
-	Expect(sourcer.Init()).To(BeNil())
-	testFileSourcer(sourcer)
+	assert.Nil(t, sourcer.Init())
+	testFileSourcer(t, sourcer)
 }
 
-func (s *FileSourcerSuite) TestLoadTOMLNoParser(t sweet.T) {
+func TestFileSourcerLoadTOMLNoParser(t *testing.T) {
 	sourcer := NewFileSourcer("test-files/values.toml", nil)
-	Expect(sourcer.Init()).To(BeNil())
-	testFileSourcer(sourcer)
+	assert.Nil(t, sourcer.Init())
+	testFileSourcer(t, sourcer)
 }
 
-func (s *FileSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
+func TestFileSourcerLoadJSONWithFakeFS(t *testing.T) {
 	fs := NewMockFileSystem()
 	fs.ReadFileFunc.SetDefaultReturn([]byte(`{
 		"foo": "bar",
@@ -63,48 +62,53 @@ func (s *FileSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 	}`), nil)
 
 	sourcer := NewFileSourcer("test-files/values.json", ParseYAML, WithFileSourcerFS(fs))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	testFileSourcer(sourcer)
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/values.json"))
+	testFileSourcer(t, sourcer)
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/values.json" // TODO - ergonomics
+	})
 }
 
-func (s *FileSourcerSuite) TestOptionalFileSourcer(t sweet.T) {
+func TestOptionalFileSourcer(t *testing.T) {
 	sourcer := NewOptionalFileSourcer("test-files/no-such-file.json", nil)
-	Expect(sourcer.Init()).To(BeNil())
-	ensureMissing(sourcer, []string{"foo"})
+	assert.Nil(t, sourcer.Init())
+	ensureMissing(t, sourcer, []string{"foo"})
 }
 
-func (s *FileSourcerSuite) TestOptionalFileSourcerWithFakeFS(t sweet.T) {
+func TestOptionalFileSourcerWithFakeFS(t *testing.T) {
 	fs := NewMockFileSystem()
 	fs.ExistsFunc.SetDefaultReturn(false, nil)
 	sourcer := NewOptionalFileSourcer("test-files/no-such-file.json", nil, WithFileSourcerFS(fs))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	ensureMissing(sourcer, []string{"foo"})
-	Expect(fs.ExistsFunc).To(BeCalledOnceWith("test-files/no-such-file.json"))
+	ensureMissing(t, sourcer, []string{"foo"})
+	mockassert.CalledOnceMatching(t, fs.ExistsFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemExistsFuncCall).Arg0 == "test-files/no-such-file.json" // TODO - ergonomics
+	})
 }
 
-func (s *FileSourcerSuite) TestDump(t sweet.T) {
+func TestFileSourcerDump(t *testing.T) {
 	sourcer := NewOptionalFileSourcer("test-files/values.json", ParseYAML)
-	Expect(sourcer.Init()).To(BeNil())
-
-	Expect(sourcer.Dump()).To(Equal(map[string]string{
+	expected := map[string]string{
 		"foo":     `bar`,
 		"bar":     `[1,2,3]`,
 		"baz":     `null`,
 		"bonk":    `{"x":1,"y":2,"z":3}`,
 		"encoded": `{"w": 4}`,
 		"deeply":  `{"nested":{"struct":[1,2,3]}}`,
-	}))
+	}
+
+	assert.Nil(t, sourcer.Init())
+	assert.Equal(t, expected, sourcer.Dump())
 }
 
-func testFileSourcer(sourcer Sourcer) {
-	ensureEquals(sourcer, []string{"foo"}, "bar")
-	ensureMatches(sourcer, []string{"bar"}, "[1, 2, 3]")
-	ensureMatches(sourcer, []string{"bonk"}, `{"x": 1, "y": 2, "z": 3}`)
-	ensureMatches(sourcer, []string{"encoded"}, `{"w": 4}`)
-	ensureMatches(sourcer, []string{"bonk.x"}, `1`)
-	ensureMatches(sourcer, []string{"encoded.w"}, `4`)
-	ensureMatches(sourcer, []string{"deeply.nested.struct"}, `[1, 2, 3]`)
+func testFileSourcer(t *testing.T, sourcer Sourcer) {
+	ensureEquals(t, sourcer, []string{"foo"}, "bar")
+	ensureMatches(t, sourcer, []string{"bar"}, "[1, 2, 3]")
+	ensureMatches(t, sourcer, []string{"bonk"}, `{"x": 1, "y": 2, "z": 3}`)
+	ensureMatches(t, sourcer, []string{"encoded"}, `{"w": 4}`)
+	ensureMatches(t, sourcer, []string{"bonk.x"}, `1`)
+	ensureMatches(t, sourcer, []string{"encoded.w"}, `4`)
+	ensureMatches(t, sourcer, []string{"deeply.nested.struct"}, `[1, 2, 3]`)
 }

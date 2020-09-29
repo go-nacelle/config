@@ -1,24 +1,23 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/efritz/go-mockgen/matchers"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	mockassert "github.com/efritz/go-mockgen/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-type GlobSourcerSuite struct{}
-
-func (s *GlobSourcerSuite) TestLoadJSON(t sweet.T) {
+func TestGlobSourcerLoadJSON(t *testing.T) {
 	sourcer := NewGlobSourcer("test-files/**/*.json", nil)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	ensureEquals(sourcer, []string{"nested-x"}, "1")
-	ensureEquals(sourcer, []string{"nested-y"}, "2")
-	ensureEquals(sourcer, []string{"nested-z"}, "3")
-	ensureEquals(sourcer, []string{"nested-w"}, "4")
+	ensureEquals(t, sourcer, []string{"nested-x"}, "1")
+	ensureEquals(t, sourcer, []string{"nested-y"}, "2")
+	ensureEquals(t, sourcer, []string{"nested-z"}, "3")
+	ensureEquals(t, sourcer, []string{"nested-w"}, "4")
 }
 
-func (s *GlobSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
+func TestGlobSourcerLoadJSONWithFakeFS(t *testing.T) {
 	fs := NewMockFileSystem()
 	fs.GlobFunc.SetDefaultReturn([]string{
 		"test-files/dir/nested-a/x.json",
@@ -33,22 +32,32 @@ func (s *GlobSourcerSuite) TestLoadJSONWithFakeFS(t sweet.T) {
 	fs.ReadFileFunc.PushReturn([]byte(`{"nested-w": 4}`), nil)
 
 	sourcer := NewGlobSourcer("test-files/**/*.json", nil, WithGlobSourcerFS(fs))
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	Expect(fs.GlobFunc).To(BeCalledOnceWith("test-files/**/*.json"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/nested-a/x.json"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/nested-b/y.json"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/nested-b/z.json"))
-	Expect(fs.ReadFileFunc).To(BeCalledOnceWith("test-files/dir/nested-b/nested-c/w.json"))
+	mockassert.CalledOnceMatching(t, fs.GlobFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemGlobFuncCall).Arg0 == "test-files/**/*.json" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-a/x.json" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/y.json" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/z.json" // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/nested-c/w.json" // TODO - ergonomics
+	})
 
-	ensureEquals(sourcer, []string{"nested-x"}, "1")
-	ensureEquals(sourcer, []string{"nested-y"}, "2")
-	ensureEquals(sourcer, []string{"nested-z"}, "3")
-	ensureEquals(sourcer, []string{"nested-w"}, "4")
+	ensureEquals(t, sourcer, []string{"nested-x"}, "1")
+	ensureEquals(t, sourcer, []string{"nested-y"}, "2")
+	ensureEquals(t, sourcer, []string{"nested-z"}, "3")
+	ensureEquals(t, sourcer, []string{"nested-w"}, "4")
 }
 
-func (s *GlobSourcerSuite) TestNoMatches(t sweet.T) {
+func TestGlobSourcerNoMatches(t *testing.T) {
 	sourcer := NewGlobSourcer("test-files/notexist/*.yaml", nil)
-	Expect(sourcer.Init()).To(BeNil())
-	Expect(sourcer.Tags()).To(BeEmpty())
+	assert.Nil(t, sourcer.Init())
+	assert.Empty(t, sourcer.Tags())
 }

@@ -1,14 +1,14 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/efritz/go-mockgen/matchers"
-	. "github.com/onsi/gomega"
+	"sort"
+	"testing"
+
+	mockassert "github.com/efritz/go-mockgen/assert"
+	"github.com/stretchr/testify/assert"
 )
 
-type MultiSourcerSuite struct{}
-
-func (s *MultiSourcerSuite) TestMultiSourcerBasic(t sweet.T) {
+func TestMultiSourcerBasic(t *testing.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s1.TagsFunc.SetDefaultReturn([]string{"env"})
@@ -31,14 +31,14 @@ func (s *MultiSourcerSuite) TestMultiSourcerBasic(t sweet.T) {
 	})
 
 	sourcer := NewMultiSourcer(s2, s1)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
-	ensureEquals(sourcer, []string{"foo"}, "bar")
-	ensureEquals(sourcer, []string{"bar"}, "baz")
-	ensureMissing(sourcer, []string{"baz"})
+	ensureEquals(t, sourcer, []string{"foo"}, "bar")
+	ensureEquals(t, sourcer, []string{"bar"}, "baz")
+	ensureMissing(t, sourcer, []string{"baz"})
 }
 
-func (s *MultiSourcerSuite) TestMultiSourcerPriority(t sweet.T) {
+func TestMultiSourcerPriority(t *testing.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s1.TagsFunc.SetDefaultReturn([]string{"env"})
@@ -47,11 +47,11 @@ func (s *MultiSourcerSuite) TestMultiSourcerPriority(t sweet.T) {
 	s2.GetFunc.SetDefaultReturn("baz", FlagFound, nil)
 
 	sourcer := NewMultiSourcer(s2, s1)
-	Expect(sourcer.Init()).To(BeNil())
-	ensureEquals(sourcer, []string{"foo"}, "bar")
+	assert.Nil(t, sourcer.Init())
+	ensureEquals(t, sourcer, []string{"foo"}, "bar")
 }
 
-func (s *MultiSourcerSuite) TestMultiSourcerTags(t sweet.T) {
+func TestMultiSourcerTags(t *testing.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s3 := NewMockSourcer()
@@ -64,14 +64,14 @@ func (s *MultiSourcerSuite) TestMultiSourcerTags(t sweet.T) {
 	s5.TagsFunc.SetDefaultReturn([]string{"e"})
 
 	sourcer := NewMultiSourcer(s5, s4, s3, s2, s1)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	tags := sourcer.Tags()
-	Expect(tags).To(HaveLen(5))
-	Expect(tags).To(ConsistOf("a", "b", "c", "d", "e"))
+	sort.Strings(tags)
+	assert.Equal(t, []string{"a", "b", "c", "d", "e"}, tags)
 }
 
-func (s *MultiSourcerSuite) TestMultiSourcerDifferentTags(t sweet.T) {
+func TestMultiSourcerDifferentTags(t *testing.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s3 := NewMockSourcer()
@@ -83,17 +83,24 @@ func (s *MultiSourcerSuite) TestMultiSourcerDifferentTags(t sweet.T) {
 	s3.GetFunc.SetDefaultReturn("", FlagMissing, nil)
 
 	sourcer := NewMultiSourcer(s3, s2, s1)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	_, flag, err := sourcer.Get([]string{"foo", "bar"})
-	Expect(err).To(BeNil())
-	Expect(flag).To(Equal(FlagMissing))
-	Expect(s1.GetFunc).To(BeCalledOnceWith([]string{"foo"}))
-	Expect(s2.GetFunc).To(BeCalledOnceWith([]string{"bar"}))
-	Expect(s3.GetFunc).To(BeCalledOnceWith([]string{"foo"}))
+	assert.Nil(t, err)
+	assert.Equal(t, FlagMissing, flag)
+
+	mockassert.CalledOnceMatching(t, s1.GetFunc, func(t assert.TestingT, call interface{}) bool {
+		return assert.Equal(t, []string{"foo"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, s2.GetFunc, func(t assert.TestingT, call interface{}) bool {
+		return assert.Equal(t, []string{"bar"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
+	})
+	mockassert.CalledOnceMatching(t, s3.GetFunc, func(t assert.TestingT, call interface{}) bool {
+		return assert.Equal(t, []string{"foo"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
+	})
 }
 
-func (s *MultiSourcerSuite) TestMultiSourceSkip(t sweet.T) {
+func TestMultiSourcerSkip(t *testing.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s3 := NewMockSourcer()
@@ -106,14 +113,14 @@ func (s *MultiSourcerSuite) TestMultiSourceSkip(t sweet.T) {
 	s3.GetFunc.SetDefaultReturn("", FlagSkip, nil)
 
 	sourcer := NewMultiSourcer(s3, s2, s1)
-	Expect(sourcer.Init()).To(BeNil())
+	assert.Nil(t, sourcer.Init())
 
 	_, flag, err := sourcer.Get([]string{"", ""})
-	Expect(err).To(BeNil())
-	Expect(flag).To(Equal(FlagSkip))
+	assert.Nil(t, err)
+	assert.Equal(t, FlagSkip, flag)
 }
 
-func (s *MultiSourcerSuite) TestDump(t sweet.T) {
+func TestMultiSourcerDump(t *testing.T) {
 	s1 := NewMockSourcer()
 	s2 := NewMockSourcer()
 	s3 := NewMockSourcer()
@@ -122,11 +129,12 @@ func (s *MultiSourcerSuite) TestDump(t sweet.T) {
 	s3.DumpFunc.SetDefaultReturn(map[string]string{"c": "baz"})
 
 	sourcer := NewMultiSourcer(s3, s2, s1)
-	Expect(sourcer.Init()).To(BeNil())
-
-	Expect(sourcer.Dump()).To(Equal(map[string]string{
+	expected := map[string]string{
 		"a": "bonk",
 		"b": "bar",
 		"c": "baz",
-	}))
+	}
+
+	assert.Nil(t, sourcer.Init())
+	assert.Equal(t, expected, sourcer.Dump())
 }
