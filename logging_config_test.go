@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	mockassert "github.com/efritz/go-mockgen/assert"
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +23,7 @@ func TestLoggingConfigLoadLogs(t *testing.T) {
 	})
 
 	assert.Nil(t, lc.Load(chunk))
-	mockassert.CalledOnceMatching(t, logger.PrintfFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, logger.PrintfFunc, func(t assert.TestingT, call interface{}) bool {
 		c := call.(LoggerPrintfFuncCall)
 		// TODO - also match "\nQ=[\"bar\",\"baz\",\"bonk\"]\nX=foo\nY=123"
 		return c.Arg0 == "Config loaded: %s"
@@ -46,7 +46,7 @@ func TestLoggingConfigMask(t *testing.T) {
 	})
 
 	assert.Nil(t, lc.Load(chunk))
-	mockassert.CalledOnceMatching(t, logger.PrintfFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, logger.PrintfFunc, func(t assert.TestingT, call interface{}) bool {
 		c := call.(LoggerPrintfFuncCall)
 		// TODO - also match "\nX=foo"
 		return c.Arg0 == "Config loaded: %s"

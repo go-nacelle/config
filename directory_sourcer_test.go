@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	mockassert "github.com/efritz/go-mockgen/assert"
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,16 +58,16 @@ func TestDirectorySourcerLoadJSONWithFakeFS(t *testing.T) {
 	ensureEquals(t, sourcer, []string{"y"}, "8")
 	ensureEquals(t, sourcer, []string{"z"}, "9")
 
-	mockassert.CalledOnceMatching(t, fs.ListFilesFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ListFilesFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemListFilesFuncCall).Arg0 == "test-files/dir" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/a.json" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/b.json" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/c.json" // TODO - ergonomics
 	})
 }
@@ -86,7 +86,7 @@ func TestOptionalDirectorySourcerWithFakeFS(t *testing.T) {
 	assert.Nil(t, sourcer.Init())
 
 	ensureMissing(t, sourcer, []string{"foo"})
-	mockassert.CalledOnceMatching(t, fs.ExistsFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ExistsFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemExistsFuncCall).Arg0 == "test-files/no-such-directory" // TODO - ergonomics
 	})
 }

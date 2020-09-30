@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	mockassert "github.com/efritz/go-mockgen/assert"
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,13 +89,13 @@ func TestMultiSourcerDifferentTags(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, FlagMissing, flag)
 
-	mockassert.CalledOnceMatching(t, s1.GetFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, s1.GetFunc, func(t assert.TestingT, call interface{}) bool {
 		return assert.Equal(t, []string{"foo"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, s2.GetFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, s2.GetFunc, func(t assert.TestingT, call interface{}) bool {
 		return assert.Equal(t, []string{"bar"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, s3.GetFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, s3.GetFunc, func(t assert.TestingT, call interface{}) bool {
 		return assert.Equal(t, []string{"foo"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
 	})
 }

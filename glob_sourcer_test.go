@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	mockassert "github.com/efritz/go-mockgen/assert"
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,19 +34,19 @@ func TestGlobSourcerLoadJSONWithFakeFS(t *testing.T) {
 	sourcer := NewGlobSourcer("test-files/**/*.json", nil, WithGlobSourcerFS(fs))
 	assert.Nil(t, sourcer.Init())
 
-	mockassert.CalledOnceMatching(t, fs.GlobFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.GlobFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemGlobFuncCall).Arg0 == "test-files/**/*.json" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-a/x.json" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/y.json" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/z.json" // TODO - ergonomics
 	})
-	mockassert.CalledOnceMatching(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
 		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/nested-c/w.json" // TODO - ergonomics
 	})
 
