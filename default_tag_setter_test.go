@@ -1,46 +1,33 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type DefaultTagSetterSuite struct{}
+func TestDefaultTagSetter(t *testing.T) {
+	type C struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
 
-func (s *DefaultTagSetterSuite) TestDefaultTagSetter(t sweet.T) {
-	obj, err := ApplyTagModifiers(
-		&BasicConfig{},
-		NewDefaultTagSetter("X", "r"),
-		NewDefaultTagSetter("Y", "null"),
-	)
-
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"default": "r",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{
-		"default": "null",
-	}))
+	obj, err := ApplyTagModifiers(&C{}, NewDefaultTagSetter("X", "r"), NewDefaultTagSetter("Y", "null"))
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }
 
-func (s *DefaultTagSetterSuite) TestDefaultTagSetterEmbedded(t sweet.T) {
-	obj, err := ApplyTagModifiers(
-		&ParentConfig{},
-		NewDefaultTagSetter("X", "r"),
-		NewDefaultTagSetter("Y", "null"),
-	)
+func TestDefaultTagSetterEmbedded(t *testing.T) {
+	type C1 struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+	type C2 struct{ C1 }
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"default": "r",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{
-		"default": "null",
-	}))
+	obj, err := ApplyTagModifiers(&C2{}, NewDefaultTagSetter("X", "r"), NewDefaultTagSetter("Y", "null"))
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }

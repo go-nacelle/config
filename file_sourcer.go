@@ -10,19 +10,17 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-type (
-	fileSourcer struct {
-		filename string
-		parser   FileParser
-		fs       FileSystem
-		optional bool
-		values   map[string]string
-	}
-
-	FileParser func(content []byte) (map[string]interface{}, error)
-)
+type fileSourcer struct {
+	filename string
+	parser   FileParser
+	fs       FileSystem
+	optional bool
+	values   map[string]string
+}
 
 var _ Sourcer = &fileSourcer{}
+
+type FileParser func(content []byte) (map[string]interface{}, error)
 
 var parserMap = map[string]FileParser{
 	".yaml": ParseYAML,

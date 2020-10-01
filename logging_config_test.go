@@ -1,81 +1,84 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/efritz/go-mockgen/matchers"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type LoggingConfigSuite struct{}
+func TestLoggingConfigLoadLogs(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
 
-func (s *LoggingConfigSuite) TestLoadLogs(t sweet.T) {
-	var (
-		config = NewMockConfig()
-		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger, nil)
-		chunk  = &TestSimpleConfig{}
-	)
+	config := NewMockConfig()
+	logger := NewMockLogger()
+	lc := NewLoggingConfig(config, logger, nil)
+	chunk := &C{}
 
 	config.LoadFunc.SetDefaultHook(func(target interface{}, modifiers ...TagModifier) error {
-		target.(*TestSimpleConfig).X = "foo"
-		target.(*TestSimpleConfig).Y = 123
-		target.(*TestSimpleConfig).Z = []string{"bar", "baz", "bonk"}
+		target.(*C).X = "foo"
+		target.(*C).Y = 123
+		target.(*C).Z = []string{"bar", "baz", "bonk"}
 		return nil
 	})
 
-	Expect(lc.Load(chunk)).To(BeNil())
-	Expect(logger.PrintfFunc).To(BeCalledOnceWith(
-		"Config loaded: %s",
-		"\nQ=[\"bar\",\"baz\",\"bonk\"]\nX=foo\nY=123",
-	))
+	require.Nil(t, lc.Load(chunk))
+	mockassert.CalledOnceWith(t, logger.PrintfFunc, mockassert.Values("Config loaded: %s", "\nQ=[\"bar\",\"baz\",\"bonk\"]\nX=foo\nY=123"))
 }
 
-func (s *LoggingConfigSuite) TestMask(t sweet.T) {
-	var (
-		config = NewMockConfig()
-		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger, nil)
-		chunk  = &TestMaskConfig{}
-	)
+func TestLoggingConfigMask(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y" mask:"true"`
+		Z []string `env:"w" mask:"true"`
+	}
+
+	config := NewMockConfig()
+	logger := NewMockLogger()
+	lc := NewLoggingConfig(config, logger, nil)
+	chunk := &C{}
 
 	config.LoadFunc.SetDefaultHook(func(target interface{}, modifiers ...TagModifier) error {
-		target.(*TestMaskConfig).X = "foo"
-		target.(*TestMaskConfig).Y = 123
-		target.(*TestMaskConfig).Z = []string{"bar", "baz", "bonk"}
+		target.(*C).X = "foo"
+		target.(*C).Y = 123
+		target.(*C).Z = []string{"bar", "baz", "bonk"}
 		return nil
 	})
 
-	Expect(lc.Load(chunk)).To(BeNil())
-	Expect(logger.PrintfFunc).To(BeCalledOnceWith(
-		"Config loaded: %s",
-		"\nX=foo",
-	))
+	require.Nil(t, lc.Load(chunk))
+	mockassert.CalledOnceWith(t, logger.PrintfFunc, mockassert.Values("Config loaded: %s", "\nX=foo"))
 }
 
-func (s *LoggingConfigSuite) TestBadMaskTag(t sweet.T) {
-	var (
-		config = NewMockConfig()
-		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger, nil)
-		chunk  = &TestBadMaskTagConfig{}
-	)
+func TestLoggingConfigBadMaskTag(t *testing.T) {
+	type C struct {
+		X string `env:"x" mask:"34"`
+	}
 
-	Expect(lc.Load(chunk)).To(MatchError("" +
-		"failed to serialize config" +
-		" (" +
-		"field 'X' has an invalid mask tag" +
-		")",
-	))
+	config := NewMockConfig()
+	logger := NewMockLogger()
+	lc := NewLoggingConfig(config, logger, nil)
+	chunk := &C{}
+
+	assert.EqualError(t, lc.Load(chunk), "failed to serialize config (field 'X' has an invalid mask tag)")
 }
 
-func (s *LoggingConfigSuite) TestMustLoadLogs(t sweet.T) {
-	var (
-		config = NewMockConfig()
-		logger = NewMockLogger()
-		lc     = NewLoggingConfig(config, logger, nil)
-		chunk  = &TestSimpleConfig{}
-	)
+func TestLoggingConfigMustLoadLogs(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
+	config := NewMockConfig()
+	logger := NewMockLogger()
+	lc := NewLoggingConfig(config, logger, nil)
+	chunk := &C{}
 
 	lc.MustLoad(chunk)
-	Expect(logger.PrintfFunc).To(BeCalledOnce())
+	mockassert.CalledOnce(t, logger.PrintfFunc)
 }

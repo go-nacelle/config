@@ -2,15 +2,13 @@ package config
 
 import "os"
 
-type (
-	flagSourcerOptions struct {
-		args []string
-	}
+type flagSourcerOptions struct {
+	args []string
+}
 
-	// FlagSourcerConfigFunc is a function used to configure instances of
-	// flag sourcers.
-	FlagSourcerConfigFunc func(*flagSourcerOptions)
-)
+// FlagSourcerConfigFunc is a function used to configure instances of
+// flag sourcers.
+type FlagSourcerConfigFunc func(*flagSourcerOptions)
 
 // WithFlagSourcerArgs sets raw command line arguments.
 func WithFlagSourcerArgs(args []string) FlagSourcerConfigFunc {

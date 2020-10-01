@@ -1,42 +1,33 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type DisplayTagSetterSuite struct{}
+func TestDisplayTagSetter(t *testing.T) {
+	type C struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
 
-func (s *DisplayTagSetterSuite) TestDisplayTagSetter(t sweet.T) {
-	obj, err := ApplyTagModifiers(
-		&BasicConfig{},
-		NewDisplayTagSetter(),
-	)
-
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"display": "a",
-		"default": "q",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{}))
+	obj, err := ApplyTagModifiers(&C{}, NewDisplayTagSetter())
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "display": "a", "default": "q"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }
 
-func (s *DisplayTagSetterSuite) TestDisplayTagSetterEmbedded(t sweet.T) {
-	obj, err := ApplyTagModifiers(
-		&ParentConfig{},
-		NewDisplayTagSetter(),
-	)
+func TestDisplayTagSetterEmbedded(t *testing.T) {
+	type C1 struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+	type C2 struct{ C1 }
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"display": "a",
-		"default": "q",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{}))
+	obj, err := ApplyTagModifiers(&C2{}, NewDisplayTagSetter())
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "display": "a", "default": "q"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }

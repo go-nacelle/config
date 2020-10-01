@@ -9,19 +9,17 @@ import (
 	"strings"
 )
 
-type (
-	loggingConfig struct {
-		Config
-		logger     Logger
-		maskedKeys []string
-	}
+// Logger is an interface to the logger where config values are printed.
+type Logger interface {
+	// Printf logs a message. Arguments should be handled in the manner of fmt.Printf.
+	Printf(format string, args ...interface{})
+}
 
-	// Logger is an interface to the logger where config values are printed.
-	Logger interface {
-		// Printf logs a message. Arguments should be handled in the manner of fmt.Printf.
-		Printf(format string, args ...interface{})
-	}
-)
+type loggingConfig struct {
+	Config
+	logger     Logger
+	maskedKeys []string
+}
 
 // NewLoggingConfig wraps a config object with logging. After each successful load,
 // the populated configuration object is serialized as fields and output at the info
@@ -88,13 +86,11 @@ func dumpChunk(obj interface{}) (map[string]interface{}, error) {
 
 	m := map[string]interface{}{}
 	for i := 0; i < objType.NumField(); i++ {
-		var (
-			fieldType       = objType.Field(i)
-			fieldValue      = objValue.Field(i)
-			maskTagValue    = fieldType.Tag.Get(MaskTag)
-			displayTagValue = fieldType.Tag.Get(DisplayTag)
-			displayName     = fieldType.Name
-		)
+		fieldType := objType.Field(i)
+		fieldValue := objValue.Field(i)
+		maskTagValue := fieldType.Tag.Get(MaskTag)
+		displayTagValue := fieldType.Tag.Get(DisplayTag)
+		displayName := fieldType.Name
 
 		if displayTagValue != "" {
 			displayName = displayTagValue

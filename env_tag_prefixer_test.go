@@ -1,28 +1,31 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type EnvTagPrefixerSuite struct{}
+func TestEnvTagPrefixer(t *testing.T) {
+	type C struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
 
-func (s *EnvTagPrefixerSuite) TestEnvTagPrefixer(t sweet.T) {
-	obj, err := ApplyTagModifiers(&BasicConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+	obj, err := ApplyTagModifiers(&C{}, NewEnvTagPrefixer("foo"))
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }
 
-func (s *EnvTagPrefixerSuite) TestEnvTagPrefixerEmbedded(t sweet.T) {
-	obj, err := ApplyTagModifiers(&ParentConfig{}, NewEnvTagPrefixer("foo"))
-	Expect(err).To(BeNil())
+func TestEnvTagPrefixerEmbedded(t *testing.T) {
+	type C1 struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+	type C2 struct{ C1 }
 
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "foo_a",
-		"default": "q",
-	}))
+	obj, err := ApplyTagModifiers(&C2{}, NewEnvTagPrefixer("foo"))
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "foo_a", "default": "q"}, gatherTags(obj, "X"))
 }

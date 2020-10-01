@@ -1,12 +1,12 @@
 package config
 
-type (
-	fileSourcerOptions struct{ fs FileSystem }
+type fileSourcerOptions struct {
+	fs FileSystem
+}
 
-	// FileSourcerConfigFunc is a function used to configure instances of
-	// file sourcers.
-	FileSourcerConfigFunc func(*fileSourcerOptions)
-)
+// FileSourcerConfigFunc is a function used to configure instances of
+// file sourcers.
+type FileSourcerConfigFunc func(*fileSourcerOptions)
 
 // WithFileSourcerFS sets the FileSystem instance.
 func WithFileSourcerFS(fs FileSystem) FileSourcerConfigFunc {

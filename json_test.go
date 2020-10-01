@@ -1,37 +1,34 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type JSONSuite struct{}
-
-func (s *JSONSuite) TestToJSONString(t sweet.T) {
+func TestToJSONString(t *testing.T) {
 	var val string
-	ok := toJSON([]byte("foobar"), &val)
-	Expect(ok).To(BeTrue())
-	Expect(val).To(Equal("foobar"))
+	require.True(t, toJSON([]byte("foobar"), &val))
+	assert.Equal(t, "foobar", val)
 }
 
-func (s *JSONSuite) TestToJSONNonString(t sweet.T) {
+func TestToJSONNonString(t *testing.T) {
 	var val []int
-	ok := toJSON([]byte("[1, 2, 3, 4, 5]"), &val)
-	Expect(ok).To(BeTrue())
-	Expect(val).To(Equal([]int{1, 2, 3, 4, 5}))
+	require.True(t, toJSON([]byte("[1, 2, 3, 4, 5]"), &val))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, val)
 }
 
-func (s *JSONSuite) TestToJSONBadType(t sweet.T) {
+func TestToJSONBadType(t *testing.T) {
 	var val []int
-	ok := toJSON([]byte(`[1, 2, "3", 4, 5]`), &val)
-	Expect(ok).To(BeFalse())
+	assert.False(t, toJSON([]byte(`[1, 2, "3", 4, 5]`), &val))
 }
 
-func (s *JSONSuite) TestQuoteJSON(t sweet.T) {
+func TestQuoteJSON(t *testing.T) {
 	json := quoteJSON([]byte(`
 	foo
 	bar
 	baz`))
 
-	Expect(json).To(MatchJSON(`"\n\tfoo\n\tbar\n\tbaz"`))
+	assert.JSONEq(t, `"\n\tfoo\n\tbar\n\tbaz"`, string(json))
 }

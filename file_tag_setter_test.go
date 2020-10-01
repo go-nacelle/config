@@ -1,42 +1,33 @@
 package config
 
 import (
-	"github.com/aphistic/sweet"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type FileTagSetterSuite struct{}
+func TestFileTagSetter(t *testing.T) {
+	type C struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
 
-func (s *FileTagSetterSuite) TestFileTagSetter(t sweet.T) {
-	obj, err := ApplyTagModifiers(
-		&BasicConfig{},
-		NewFileTagSetter(),
-	)
-
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"file":    "a",
-		"default": "q",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{}))
+	obj, err := ApplyTagModifiers(&C{}, NewFileTagSetter())
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "file": "a", "default": "q"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }
 
-func (s *FileTagSetterSuite) TestFileTagSetterEmbedded(t sweet.T) {
-	obj, err := ApplyTagModifiers(
-		&ParentConfig{},
-		NewFileTagSetter(),
-	)
+func TestFileTagSetterEmbedded(t *testing.T) {
+	type C1 struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+	type C2 struct{ C1 }
 
-	Expect(err).To(BeNil())
-
-	Expect(gatherTags(obj, "X")).To(Equal(map[string]string{
-		"env":     "a",
-		"file":    "a",
-		"default": "q",
-	}))
-
-	Expect(gatherTags(obj, "Y")).To(Equal(map[string]string{}))
+	obj, err := ApplyTagModifiers(&C2{}, NewFileTagSetter())
+	require.Nil(t, err)
+	assert.Equal(t, map[string]string{"env": "a", "file": "a", "default": "q"}, gatherTags(obj, "X"))
+	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }

@@ -1,12 +1,12 @@
 package config
 
-type (
-	globSourcerOptions struct{ fs FileSystem }
+type globSourcerOptions struct {
+	fs FileSystem
+}
 
-	// GlobSourcerConfigFunc is a function used to configure instances of
-	// glob sourcers.
-	GlobSourcerConfigFunc func(*globSourcerOptions)
-)
+// GlobSourcerConfigFunc is a function used to configure instances of
+// glob sourcers.
+type GlobSourcerConfigFunc func(*globSourcerOptions)
 
 // WithGlobSourcerFS sets the FileSystem instance.
 func WithGlobSourcerFS(fs FileSystem) GlobSourcerConfigFunc {

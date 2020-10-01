@@ -11,6 +11,8 @@ type envTagPrefixer struct {
 	prefix string
 }
 
+var _ TagModifier = &envTagPrefixer{}
+
 // NewEnvTagPrefixer creates a new TagModifier which adds a prefix to the
 // values of `env` tags. This can be used to register one config multiple
 // times and have their initialization be read from different environment
