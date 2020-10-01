@@ -119,12 +119,10 @@ func (c *config) loadStruct(objValue reflect.Value, objType reflect.Type) []erro
 
 	errors := []error{}
 	for i := 0; i < objType.NumField(); i++ {
-		var (
-			field            = objValue.Field(i)
-			fieldType        = objType.Field(i)
-			defaultTagValue  = fieldType.Tag.Get(DefaultTag)
-			requiredTagValue = fieldType.Tag.Get(RequiredTag)
-		)
+		field := objValue.Field(i)
+		fieldType := objType.Field(i)
+		defaultTagValue := fieldType.Tag.Get(DefaultTag)
+		requiredTagValue := fieldType.Tag.Get(RequiredTag)
 
 		if fieldType.Anonymous {
 			errors = append(errors, c.loadStruct(field, fieldType.Type)...)

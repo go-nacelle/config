@@ -5,11 +5,12 @@ import (
 
 	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGlobSourcerLoadJSON(t *testing.T) {
 	sourcer := NewGlobSourcer("test-files/**/*.json", nil)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	ensureEquals(t, sourcer, []string{"nested-x"}, "1")
 	ensureEquals(t, sourcer, []string{"nested-y"}, "2")
@@ -32,7 +33,7 @@ func TestGlobSourcerLoadJSONWithFakeFS(t *testing.T) {
 	fs.ReadFileFunc.PushReturn([]byte(`{"nested-w": 4}`), nil)
 
 	sourcer := NewGlobSourcer("test-files/**/*.json", nil, WithGlobSourcerFS(fs))
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	mockassert.CalledOnceWith(t, fs.GlobFunc, mockassert.Values("test-files/**/*.json"))
 	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/nested-a/x.json"))
@@ -48,6 +49,6 @@ func TestGlobSourcerLoadJSONWithFakeFS(t *testing.T) {
 
 func TestGlobSourcerNoMatches(t *testing.T) {
 	sourcer := NewGlobSourcer("test-files/notexist/*.yaml", nil)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 	assert.Empty(t, sourcer.Tags())
 }

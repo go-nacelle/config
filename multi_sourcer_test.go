@@ -6,6 +6,7 @@ import (
 
 	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMultiSourcerBasic(t *testing.T) {
@@ -31,7 +32,7 @@ func TestMultiSourcerBasic(t *testing.T) {
 	})
 
 	sourcer := NewMultiSourcer(s2, s1)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	ensureEquals(t, sourcer, []string{"foo"}, "bar")
 	ensureEquals(t, sourcer, []string{"bar"}, "baz")
@@ -47,7 +48,7 @@ func TestMultiSourcerPriority(t *testing.T) {
 	s2.GetFunc.SetDefaultReturn("baz", FlagFound, nil)
 
 	sourcer := NewMultiSourcer(s2, s1)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 	ensureEquals(t, sourcer, []string{"foo"}, "bar")
 }
 
@@ -64,7 +65,7 @@ func TestMultiSourcerTags(t *testing.T) {
 	s5.TagsFunc.SetDefaultReturn([]string{"e"})
 
 	sourcer := NewMultiSourcer(s5, s4, s3, s2, s1)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	tags := sourcer.Tags()
 	sort.Strings(tags)
@@ -83,10 +84,10 @@ func TestMultiSourcerDifferentTags(t *testing.T) {
 	s3.GetFunc.SetDefaultReturn("", FlagMissing, nil)
 
 	sourcer := NewMultiSourcer(s3, s2, s1)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	_, flag, err := sourcer.Get([]string{"foo", "bar"})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	assert.Equal(t, FlagMissing, flag)
 
 	mockassert.CalledOnceWith(t, s1.GetFunc, mockassert.Values([]string{"foo"}))
@@ -107,10 +108,10 @@ func TestMultiSourcerSkip(t *testing.T) {
 	s3.GetFunc.SetDefaultReturn("", FlagSkip, nil)
 
 	sourcer := NewMultiSourcer(s3, s2, s1)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	_, flag, err := sourcer.Get([]string{"", ""})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	assert.Equal(t, FlagSkip, flag)
 }
 
@@ -129,6 +130,6 @@ func TestMultiSourcerDump(t *testing.T) {
 		"c": "baz",
 	}
 
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 	assert.Equal(t, expected, sourcer.Dump())
 }

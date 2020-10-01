@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTestEnvSourcerUnprefixed(t *testing.T) {
@@ -13,7 +14,7 @@ func TestTestEnvSourcerUnprefixed(t *testing.T) {
 	}
 
 	sourcer := NewTestEnvSourcer(values)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"Y"})
@@ -28,7 +29,7 @@ func TestTestEnvSourcerNormalizedCasing(t *testing.T) {
 	}
 
 	sourcer := NewTestEnvSourcer(values)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"y"})
@@ -43,7 +44,7 @@ func TestTestEnvSourcerDump(t *testing.T) {
 	}
 
 	sourcer := NewTestEnvSourcer(values)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	dump := sourcer.Dump()
 	assert.Equal(t, "foo", dump["X"])

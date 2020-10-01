@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFlagSourcerGet(t *testing.T) {
 	sourcer := NewFlagSourcer(WithFlagSourcerArgs([]string{"-X=foo", "--Y", "123"}))
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	val1, _, _ := sourcer.Get([]string{"X"})
 	val2, _, _ := sourcer.Get([]string{"Y"})
@@ -31,7 +32,7 @@ func TestFlagSourcerMissingArgument(t *testing.T) {
 
 func TestFlagSourcerDump(t *testing.T) {
 	sourcer := NewFlagSourcer(WithFlagSourcerArgs([]string{"-X=foo", "--Y", "123"}))
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	dump := sourcer.Dump()
 	assert.Equal(t, "foo", dump["X"])

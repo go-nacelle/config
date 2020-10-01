@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDefaultTagSetter(t *testing.T) {
@@ -13,7 +14,7 @@ func TestDefaultTagSetter(t *testing.T) {
 		NewDefaultTagSetter("Y", "null"),
 	)
 
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
 	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }
@@ -25,7 +26,7 @@ func TestDefaultTagSetterEmbedded(t *testing.T) {
 		NewDefaultTagSetter("Y", "null"),
 	)
 
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
 	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }

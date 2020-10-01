@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDirectorySourcerLoadJSON(t *testing.T) {
 	sourcer := NewDirectorySourcer("test-files/dir", nil)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	ensureEquals(t, sourcer, []string{"a"}, "1")
 	ensureEquals(t, sourcer, []string{"b"}, "10")
@@ -47,7 +47,7 @@ func TestDirectorySourcerLoadJSONWithFakeFS(t *testing.T) {
 	}`), nil)
 
 	sourcer := NewDirectorySourcer("test-files/dir", nil, WithDirectorySourcerFS((fs)))
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	ensureEquals(t, sourcer, []string{"a"}, "1")
 	ensureEquals(t, sourcer, []string{"b"}, "10")
@@ -66,7 +66,7 @@ func TestDirectorySourcerLoadJSONWithFakeFS(t *testing.T) {
 
 func TestOptionalDirectorySourcer(t *testing.T) {
 	sourcer := NewOptionalDirectorySourcer("test-files/no-such-directory", nil)
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 	ensureMissing(t, sourcer, []string{"foo"})
 }
 
@@ -75,7 +75,7 @@ func TestOptionalDirectorySourcerWithFakeFS(t *testing.T) {
 	fs.ExistsFunc.SetDefaultReturn(false, nil)
 
 	sourcer := NewOptionalDirectorySourcer("test-files/no-such-directory", nil, WithDirectorySourcerFS(fs))
-	assert.Nil(t, sourcer.Init())
+	require.Nil(t, sourcer.Init())
 
 	ensureMissing(t, sourcer, []string{"foo"})
 	mockassert.CalledOnceWith(t, fs.ExistsFunc, mockassert.Values("test-files/no-such-directory"))

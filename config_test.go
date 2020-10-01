@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigSimpleConfig(t *testing.T) {
@@ -17,7 +18,7 @@ func TestConfigSimpleConfig(t *testing.T) {
 	}))
 
 	chunk := &TestSimpleConfig{}
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
 	assert.Equal(t, 123, chunk.Y)
 	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
@@ -31,7 +32,7 @@ func TestConfigNestedJSONDeserialization(t *testing.T) {
 		}))
 
 	chunk := &TestEmbeddedJSONConfig{}
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, &TestJSONPayload{V1: 3, V2: 3.14, V3: true}, chunk.P1)
 	assert.Equal(t, &TestJSONPayload{V1: 5, V2: 6.28, V3: false}, chunk.P2)
 }
@@ -52,7 +53,7 @@ func TestConfigDefault(t *testing.T) {
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &TestDefaultConfig{}
 
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
 	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Y)
 }
@@ -83,7 +84,7 @@ func TestConfigPostLoadConfig(t *testing.T) {
 	}))
 
 	chunk := &TestPostLoadConfig{}
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 
 	config = NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "-4",
@@ -107,7 +108,7 @@ func TestConfigLoad(t *testing.T) {
 
 	chunk := &TestSimpleConfig{}
 
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
 	assert.Equal(t, 123, chunk.Y)
 	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
@@ -122,7 +123,7 @@ func TestConfigLoadIsomorphicType(t *testing.T) {
 
 	chunk := &TestSimpleConfig{}
 
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
 	assert.Equal(t, 123, chunk.Y)
 	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
@@ -135,7 +136,7 @@ func TestConfigLoadPostLoadWithConversion(t *testing.T) {
 
 	chunk := &TestPostLoadConversion{}
 
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
@@ -146,7 +147,7 @@ func TestConfigLoadPostLoadWithTags(t *testing.T) {
 
 	chunk := &TestPostLoadConversion{}
 
-	assert.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
+	require.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
@@ -166,7 +167,7 @@ func TestConfigEmbeddedConfig(t *testing.T) {
 
 	chunk := &TestParentConfig{}
 
-	assert.Nil(t, config.Load(chunk))
+	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, 4, chunk.X)
 	assert.Equal(t, 5, chunk.Y)
 	assert.Equal(t, 1, chunk.A)
@@ -185,7 +186,7 @@ func TestConfigEmbeddedConfigWithTags(t *testing.T) {
 
 	chunk := &TestParentConfig{}
 
-	assert.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
+	require.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
 	assert.Equal(t, 4, chunk.X)
 	assert.Equal(t, 5, chunk.Y)
 	assert.Equal(t, 1, chunk.A)

@@ -86,13 +86,11 @@ func dumpChunk(obj interface{}) (map[string]interface{}, error) {
 
 	m := map[string]interface{}{}
 	for i := 0; i < objType.NumField(); i++ {
-		var (
-			fieldType       = objType.Field(i)
-			fieldValue      = objValue.Field(i)
-			maskTagValue    = fieldType.Tag.Get(MaskTag)
-			displayTagValue = fieldType.Tag.Get(DisplayTag)
-			displayName     = fieldType.Name
-		)
+		fieldType := objType.Field(i)
+		fieldValue := objValue.Field(i)
+		maskTagValue := fieldType.Tag.Get(MaskTag)
+		displayTagValue := fieldType.Tag.Get(DisplayTag)
+		displayName := fieldType.Name
 
 		if displayTagValue != "" {
 			displayName = displayTagValue

@@ -28,10 +28,8 @@ func getExportedFieldsStruct(objValue reflect.Value, objType reflect.Type) ([]*R
 
 	fields := []*ReflectField{}
 	for i := 0; i < objType.NumField(); i++ {
-		var (
-			field     = objValue.Field(i)
-			fieldType = objType.Field(i)
-		)
+		field := objValue.Field(i)
+		fieldType := objType.Field(i)
 
 		if fieldType.Anonymous {
 			embeddedFields, err := getExportedFieldsStruct(field, fieldType.Type)
