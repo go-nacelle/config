@@ -65,9 +65,7 @@ func TestFileSourcerLoadJSONWithFakeFS(t *testing.T) {
 	assert.Nil(t, sourcer.Init())
 
 	testFileSourcer(t, sourcer)
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/values.json" // TODO - ergonomics
-	})
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/values.json"))
 }
 
 func TestOptionalFileSourcer(t *testing.T) {
@@ -83,9 +81,7 @@ func TestOptionalFileSourcerWithFakeFS(t *testing.T) {
 	assert.Nil(t, sourcer.Init())
 
 	ensureMissing(t, sourcer, []string{"foo"})
-	mockassert.CalledOnceWith(t, fs.ExistsFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemExistsFuncCall).Arg0 == "test-files/no-such-file.json" // TODO - ergonomics
-	})
+	mockassert.CalledOnceWith(t, fs.ExistsFunc, mockassert.Values("test-files/no-such-file.json"))
 }
 
 func TestFileSourcerDump(t *testing.T) {

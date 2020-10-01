@@ -34,21 +34,11 @@ func TestGlobSourcerLoadJSONWithFakeFS(t *testing.T) {
 	sourcer := NewGlobSourcer("test-files/**/*.json", nil, WithGlobSourcerFS(fs))
 	assert.Nil(t, sourcer.Init())
 
-	mockassert.CalledOnceWith(t, fs.GlobFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemGlobFuncCall).Arg0 == "test-files/**/*.json" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-a/x.json" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/y.json" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/z.json" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/nested-b/nested-c/w.json" // TODO - ergonomics
-	})
+	mockassert.CalledOnceWith(t, fs.GlobFunc, mockassert.Values("test-files/**/*.json"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/nested-a/x.json"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/nested-b/y.json"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/nested-b/z.json"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/nested-b/nested-c/w.json"))
 
 	ensureEquals(t, sourcer, []string{"nested-x"}, "1")
 	ensureEquals(t, sourcer, []string{"nested-y"}, "2")

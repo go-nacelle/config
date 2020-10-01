@@ -89,15 +89,9 @@ func TestMultiSourcerDifferentTags(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, FlagMissing, flag)
 
-	mockassert.CalledOnceWith(t, s1.GetFunc, func(t assert.TestingT, call interface{}) bool {
-		return assert.Equal(t, []string{"foo"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, s2.GetFunc, func(t assert.TestingT, call interface{}) bool {
-		return assert.Equal(t, []string{"bar"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, s3.GetFunc, func(t assert.TestingT, call interface{}) bool {
-		return assert.Equal(t, []string{"foo"}, call.(SourcerGetFuncCall).Arg0) // TODO - ergonomics
-	})
+	mockassert.CalledOnceWith(t, s1.GetFunc, mockassert.Values([]string{"foo"}))
+	mockassert.CalledOnceWith(t, s2.GetFunc, mockassert.Values([]string{"bar"}))
+	mockassert.CalledOnceWith(t, s3.GetFunc, mockassert.Values([]string{"foo"}))
 }
 
 func TestMultiSourcerSkip(t *testing.T) {

@@ -58,18 +58,10 @@ func TestDirectorySourcerLoadJSONWithFakeFS(t *testing.T) {
 	ensureEquals(t, sourcer, []string{"y"}, "8")
 	ensureEquals(t, sourcer, []string{"z"}, "9")
 
-	mockassert.CalledOnceWith(t, fs.ListFilesFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemListFilesFuncCall).Arg0 == "test-files/dir" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/a.json" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/b.json" // TODO - ergonomics
-	})
-	mockassert.CalledOnceWith(t, fs.ReadFileFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemReadFileFuncCall).Arg0 == "test-files/dir/c.json" // TODO - ergonomics
-	})
+	mockassert.CalledOnceWith(t, fs.ListFilesFunc, mockassert.Values("test-files/dir"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/a.json"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/b.json"))
+	mockassert.CalledOnceWith(t, fs.ReadFileFunc, mockassert.Values("test-files/dir/c.json"))
 }
 
 func TestOptionalDirectorySourcer(t *testing.T) {
@@ -86,7 +78,5 @@ func TestOptionalDirectorySourcerWithFakeFS(t *testing.T) {
 	assert.Nil(t, sourcer.Init())
 
 	ensureMissing(t, sourcer, []string{"foo"})
-	mockassert.CalledOnceWith(t, fs.ExistsFunc, func(t assert.TestingT, call interface{}) bool {
-		return call.(FileSystemExistsFuncCall).Arg0 == "test-files/no-such-directory" // TODO - ergonomics
-	})
+	mockassert.CalledOnceWith(t, fs.ExistsFunc, mockassert.Values("test-files/no-such-directory"))
 }

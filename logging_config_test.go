@@ -23,11 +23,7 @@ func TestLoggingConfigLoadLogs(t *testing.T) {
 	})
 
 	assert.Nil(t, lc.Load(chunk))
-	mockassert.CalledOnceWith(t, logger.PrintfFunc, func(t assert.TestingT, call interface{}) bool {
-		c := call.(LoggerPrintfFuncCall)
-		// TODO - also match "\nQ=[\"bar\",\"baz\",\"bonk\"]\nX=foo\nY=123"
-		return c.Arg0 == "Config loaded: %s"
-	})
+	mockassert.CalledOnceWith(t, logger.PrintfFunc, mockassert.Values("Config loaded: %s", "\nQ=[\"bar\",\"baz\",\"bonk\"]\nX=foo\nY=123"))
 }
 
 func TestLoggingConfigMask(t *testing.T) {
@@ -46,11 +42,7 @@ func TestLoggingConfigMask(t *testing.T) {
 	})
 
 	assert.Nil(t, lc.Load(chunk))
-	mockassert.CalledOnceWith(t, logger.PrintfFunc, func(t assert.TestingT, call interface{}) bool {
-		c := call.(LoggerPrintfFuncCall)
-		// TODO - also match "\nX=foo"
-		return c.Arg0 == "Config loaded: %s"
-	})
+	mockassert.CalledOnceWith(t, logger.PrintfFunc, mockassert.Values("Config loaded: %s", "\nX=foo"))
 }
 
 func TestLoggingConfigBadMaskTag(t *testing.T) {
