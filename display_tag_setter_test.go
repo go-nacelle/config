@@ -8,22 +8,25 @@ import (
 )
 
 func TestDisplayTagSetter(t *testing.T) {
-	obj, err := ApplyTagModifiers(
-		&BasicConfig{},
-		NewDisplayTagSetter(),
-	)
+	type C struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
 
+	obj, err := ApplyTagModifiers(&C{}, NewDisplayTagSetter())
 	require.Nil(t, err)
 	assert.Equal(t, map[string]string{"env": "a", "display": "a", "default": "q"}, gatherTags(obj, "X"))
 	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))
 }
 
 func TestDisplayTagSetterEmbedded(t *testing.T) {
-	obj, err := ApplyTagModifiers(
-		&ParentConfig{},
-		NewDisplayTagSetter(),
-	)
+	type C1 struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+	type C2 struct{ C1 }
 
+	obj, err := ApplyTagModifiers(&C2{}, NewDisplayTagSetter())
 	require.Nil(t, err)
 	assert.Equal(t, map[string]string{"env": "a", "display": "a", "default": "q"}, gatherTags(obj, "X"))
 	assert.Equal(t, map[string]string{}, gatherTags(obj, "Y"))

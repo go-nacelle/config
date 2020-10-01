@@ -21,13 +21,7 @@ type TagModifier interface {
 // ApplyTagModifiers returns a new struct with a dynamic type whose fields
 // are equivalent to the given object but whose field tags are run through
 // each tag modifier in sequence.
-func ApplyTagModifiers(
-	obj interface{},
-	modifiers ...TagModifier,
-) (
-	modified interface{},
-	err error,
-) {
+func ApplyTagModifiers(obj interface{}, modifiers ...TagModifier) (modified interface{}, err error) {
 	modified = obj
 	for _, modifier := range modifiers {
 		modified, err = apply(modified, modifier)

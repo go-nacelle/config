@@ -8,24 +8,25 @@ import (
 )
 
 func TestDefaultTagSetter(t *testing.T) {
-	obj, err := ApplyTagModifiers(
-		&BasicConfig{},
-		NewDefaultTagSetter("X", "r"),
-		NewDefaultTagSetter("Y", "null"),
-	)
+	type C struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
 
+	obj, err := ApplyTagModifiers(&C{}, NewDefaultTagSetter("X", "r"), NewDefaultTagSetter("Y", "null"))
 	require.Nil(t, err)
 	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
 	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))
 }
 
 func TestDefaultTagSetterEmbedded(t *testing.T) {
-	obj, err := ApplyTagModifiers(
-		&ParentConfig{},
-		NewDefaultTagSetter("X", "r"),
-		NewDefaultTagSetter("Y", "null"),
-	)
+	type C1 struct {
+		X string `env:"a" default:"q"`
+		Y string
+	}
+	type C2 struct{ C1 }
 
+	obj, err := ApplyTagModifiers(&C2{}, NewDefaultTagSetter("X", "r"), NewDefaultTagSetter("Y", "null"))
 	require.Nil(t, err)
 	assert.Equal(t, map[string]string{"env": "a", "default": "r"}, gatherTags(obj, "X"))
 	assert.Equal(t, map[string]string{"default": "null"}, gatherTags(obj, "Y"))

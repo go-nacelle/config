@@ -11,13 +11,19 @@ import (
 )
 
 func TestConfigSimpleConfig(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "foo",
 		"APP_Y": "123",
 		"APP_W": `["bar", "baz", "bonk"]`,
 	}))
 
-	chunk := &TestSimpleConfig{}
+	chunk := &C{}
 	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
 	assert.Equal(t, 123, chunk.Y)
@@ -25,33 +31,56 @@ func TestConfigSimpleConfig(t *testing.T) {
 }
 
 func TestConfigNestedJSONDeserialization(t *testing.T) {
+	type P struct {
+		V1 int     `json:"v_int"`
+		V2 float64 `json:"v_float"`
+		V3 bool    `json:"v_bool"`
+	}
+	type C struct {
+		P1 *P `env:"p1"`
+		P2 *P `env:"p2"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app",
 		map[string]string{
 			"APP_P1": `{"v_int": 3, "v_float": 3.14, "v_bool": true}`,
 			"APP_P2": `{"v_int": 5, "v_float": 6.28, "v_bool": false}`,
 		}))
 
-	chunk := &TestEmbeddedJSONConfig{}
+	chunk := &C{}
 	require.Nil(t, config.Load(chunk))
-	assert.Equal(t, &TestJSONPayload{V1: 3, V2: 3.14, V3: true}, chunk.P1)
-	assert.Equal(t, &TestJSONPayload{V1: 5, V2: 6.28, V3: false}, chunk.P2)
+	assert.Equal(t, &P{V1: 3, V2: 3.14, V3: true}, chunk.P1)
+	assert.Equal(t, &P{V1: 5, V2: 6.28, V3: false}, chunk.P2)
 }
 
 func TestConfigRequired(t *testing.T) {
+	type C struct {
+		X string `env:"x" required:"true"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", nil))
-	chunk := &TestRequiredConfig{}
+	chunk := &C{}
 	assert.EqualError(t, config.Load(chunk), "failed to load config (no value supplied for field 'X')")
 }
 
 func TestConfigRequiredBadTag(t *testing.T) {
+	type C struct {
+		X string `env:"x" required:"yup"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", nil))
-	chunk := &TestBadRequiredConfig{}
+	chunk := &C{}
 	assert.EqualError(t, config.Load(chunk), "failed to load config (field 'X' has an invalid required tag)")
 }
 
 func TestConfigDefault(t *testing.T) {
+	type C struct {
+		X string   `env:"x" default:"foo"`
+		Y []string `env:"y" default:"[\"bar\", \"baz\", \"bonk\"]"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", nil))
-	chunk := &TestDefaultConfig{}
+	chunk := &C{}
 
 	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
@@ -59,13 +88,19 @@ func TestConfigDefault(t *testing.T) {
 }
 
 func TestConfigBadType(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "123", // silently converted to string
 		"APP_Y": "foo",
 		"APP_W": `bar`,
 	}))
 
-	chunk := &TestSimpleConfig{}
+	chunk := &C{}
 	assert.EqualError(t, config.Load(chunk), fmt.Sprintf("failed to load config (%s)", strings.Join([]string{
 		"value supplied for field 'Y' cannot be coerced into the expected type",
 		"value supplied for field 'Z' cannot be coerced into the expected type",
@@ -73,8 +108,12 @@ func TestConfigBadType(t *testing.T) {
 }
 
 func TestConfigBadDefaultType(t *testing.T) {
+	type C struct {
+		X int `env:"x" default:"foo"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", nil))
-	chunk := &TestBadDefaultConfig{}
+	chunk := &C{}
 	assert.EqualError(t, config.Load(chunk), "failed to load config (default value for field 'X' cannot be coerced into the expected type)")
 }
 
@@ -83,7 +122,7 @@ func TestConfigPostLoadConfig(t *testing.T) {
 		"APP_X": "3",
 	}))
 
-	chunk := &TestPostLoadConfig{}
+	chunk := &testPostLoadConfig{}
 	require.Nil(t, config.Load(chunk))
 
 	config = NewConfig(NewFakeSourcer("app", map[string]string{
@@ -93,20 +132,42 @@ func TestConfigPostLoadConfig(t *testing.T) {
 	assert.EqualError(t, config.Load(chunk), "failed to load config (X must be positive)")
 }
 
+type testPostLoadConfig struct {
+	X int `env:"X"`
+}
+
+func (c *testPostLoadConfig) PostLoad() error {
+	if c.X < 0 {
+		return fmt.Errorf("X must be positive")
+	}
+
+	return nil
+}
+
 func TestConfigUnsettableFields(t *testing.T) {
+	type C struct {
+		x int `env:"s"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", nil))
-	chunk := &TestUnsettableConfig{}
+	chunk := &C{}
 	assert.EqualError(t, config.Load(chunk), "failed to load config (field 'x' can not be set)")
 }
 
 func TestConfigLoad(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "foo",
 		"APP_Y": "123",
 		"APP_W": `["bar", "baz", "bonk"]`,
 	}))
 
-	chunk := &TestSimpleConfig{}
+	chunk := &C{}
 
 	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
@@ -115,13 +176,19 @@ func TestConfigLoad(t *testing.T) {
 }
 
 func TestConfigLoadIsomorphicType(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "foo",
 		"APP_Y": "123",
 		"APP_W": `["bar", "baz", "bonk"]`,
 	}))
 
-	chunk := &TestSimpleConfig{}
+	chunk := &C{}
 
 	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, "foo", chunk.X)
@@ -134,8 +201,7 @@ func TestConfigLoadPostLoadWithConversion(t *testing.T) {
 		"APP_DURATION": "3",
 	}))
 
-	chunk := &TestPostLoadConversion{}
-
+	chunk := &testPostLoadConversion{}
 	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
@@ -145,10 +211,19 @@ func TestConfigLoadPostLoadWithTags(t *testing.T) {
 		"APP_FOO_DURATION": "3",
 	}))
 
-	chunk := &TestPostLoadConversion{}
-
+	chunk := &testPostLoadConversion{}
 	require.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
 	assert.Equal(t, time.Second*3, chunk.Duration)
+}
+
+type testPostLoadConversion struct {
+	RawDuration int `env:"duration"`
+	Duration    time.Duration
+}
+
+func (c *testPostLoadConversion) PostLoad() error {
+	c.Duration = time.Duration(c.RawDuration) * time.Second
+	return nil
 }
 
 func TestConfigBadConfigObjectTypes(t *testing.T) {
@@ -165,8 +240,7 @@ func TestConfigEmbeddedConfig(t *testing.T) {
 		"APP_Y": "5",
 	}))
 
-	chunk := &TestParentConfig{}
-
+	chunk := &testParentConfig{}
 	require.Nil(t, config.Load(chunk))
 	assert.Equal(t, 4, chunk.X)
 	assert.Equal(t, 5, chunk.Y)
@@ -184,8 +258,7 @@ func TestConfigEmbeddedConfigWithTags(t *testing.T) {
 		"APP_FOO_Y": "5",
 	}))
 
-	chunk := &TestParentConfig{}
-
+	chunk := &testParentConfig{}
 	require.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
 	assert.Equal(t, 4, chunk.X)
 	assert.Equal(t, 5, chunk.Y)
@@ -203,13 +276,39 @@ func TestConfigEmbeddedConfigPostLoad(t *testing.T) {
 		"APP_Y": "5",
 	}))
 
-	chunk := &TestParentConfig{}
+	chunk := &testParentConfig{}
 	assert.EqualError(t, config.Load(chunk), "failed to load config (fields must be increasing)")
 }
 
+type testParentConfig struct {
+	TestChildConfig
+	X int `env:"x"`
+	Y int `env:"y"`
+}
+
+type TestChildConfig struct {
+	A int `env:"a"`
+	B int `env:"b"`
+	C int `env:"c"`
+}
+
+func (c *TestChildConfig) PostLoad() error {
+	if c.A >= c.B || c.B >= c.C {
+		return fmt.Errorf("fields must be increasing")
+	}
+
+	return nil
+}
+
 func TestConfigBadEmbeddedObjectType(t *testing.T) {
+	type C struct {
+		*TestChildConfig
+		X int `env:"x"`
+		Y int `env:"y"`
+	}
+
 	config := NewConfig(NewFakeSourcer("app", nil))
-	chunk := &TestBadParentConfig{}
+	chunk := &C{}
 	assert.EqualError(t, config.Load(chunk), "failed to load config (invalid embedded type in configuration struct)")
 }
 

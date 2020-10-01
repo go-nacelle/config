@@ -9,15 +9,21 @@ import (
 )
 
 func TestLoggingConfigLoadLogs(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
 	config := NewMockConfig()
 	logger := NewMockLogger()
 	lc := NewLoggingConfig(config, logger, nil)
-	chunk := &TestSimpleConfig{}
+	chunk := &C{}
 
 	config.LoadFunc.SetDefaultHook(func(target interface{}, modifiers ...TagModifier) error {
-		target.(*TestSimpleConfig).X = "foo"
-		target.(*TestSimpleConfig).Y = 123
-		target.(*TestSimpleConfig).Z = []string{"bar", "baz", "bonk"}
+		target.(*C).X = "foo"
+		target.(*C).Y = 123
+		target.(*C).Z = []string{"bar", "baz", "bonk"}
 		return nil
 	})
 
@@ -26,15 +32,21 @@ func TestLoggingConfigLoadLogs(t *testing.T) {
 }
 
 func TestLoggingConfigMask(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y" mask:"true"`
+		Z []string `env:"w" mask:"true"`
+	}
+
 	config := NewMockConfig()
 	logger := NewMockLogger()
 	lc := NewLoggingConfig(config, logger, nil)
-	chunk := &TestMaskConfig{}
+	chunk := &C{}
 
 	config.LoadFunc.SetDefaultHook(func(target interface{}, modifiers ...TagModifier) error {
-		target.(*TestMaskConfig).X = "foo"
-		target.(*TestMaskConfig).Y = 123
-		target.(*TestMaskConfig).Z = []string{"bar", "baz", "bonk"}
+		target.(*C).X = "foo"
+		target.(*C).Y = 123
+		target.(*C).Z = []string{"bar", "baz", "bonk"}
 		return nil
 	})
 
@@ -43,19 +55,29 @@ func TestLoggingConfigMask(t *testing.T) {
 }
 
 func TestLoggingConfigBadMaskTag(t *testing.T) {
+	type C struct {
+		X string `env:"x" mask:"34"`
+	}
+
 	config := NewMockConfig()
 	logger := NewMockLogger()
 	lc := NewLoggingConfig(config, logger, nil)
-	chunk := &TestBadMaskTagConfig{}
+	chunk := &C{}
 
 	assert.EqualError(t, lc.Load(chunk), "failed to serialize config (field 'X' has an invalid mask tag)")
 }
 
 func TestLoggingConfigMustLoadLogs(t *testing.T) {
+	type C struct {
+		X string   `env:"x"`
+		Y int      `env:"y"`
+		Z []string `env:"w" display:"Q"`
+	}
+
 	config := NewMockConfig()
 	logger := NewMockLogger()
 	lc := NewLoggingConfig(config, logger, nil)
-	chunk := &TestSimpleConfig{}
+	chunk := &C{}
 
 	lc.MustLoad(chunk)
 	mockassert.CalledOnce(t, logger.PrintfFunc)
