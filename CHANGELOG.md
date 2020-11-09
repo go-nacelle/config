@@ -23,6 +23,10 @@
 
 ## [v1.0.0] - 2019-06-17
 
+### Changed
+
+- Migrated from [efritz/zubrin](https://github.com/efritz/zubrin).
+
 [Unreleased]: https://github.com/go-nacelle/config/compare/v1.2.1...HEAD
 [v1.0.0]: https://github.com/go-nacelle/config/releases/tag/v1.0.0
 [v1.1.0]: https://github.com/go-nacelle/config/compare/v1.0.0...v1.1.0
