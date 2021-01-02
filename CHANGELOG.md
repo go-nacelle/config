@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `Describe` method. [#8](https://github.com/go-nacelle/config/pull/8)
+
 ## [v1.2.1] - 2020-09-30
 
 ### Removed
