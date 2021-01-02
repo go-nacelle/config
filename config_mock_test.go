@@ -25,6 +25,9 @@ type MockConfig struct {
 	// MustLoadFunc is an instance of a mock function object controlling the
 	// behavior of the method MustLoad.
 	MustLoadFunc *ConfigMustLoadFunc
+	// PostLoadFunc is an instance of a mock function object controlling the
+	// behavior of the method PostLoad.
+	PostLoadFunc *ConfigPostLoadFunc
 }
 
 // NewMockConfig creates a new mock of the Config interface. All methods
@@ -61,6 +64,11 @@ func NewMockConfig() *MockConfig {
 				return
 			},
 		},
+		PostLoadFunc: &ConfigPostLoadFunc{
+			defaultHook: func(interface{}) error {
+				return nil
+			},
+		},
 	}
 }
 
@@ -85,6 +93,9 @@ func NewMockConfigFrom(i Config) *MockConfig {
 		},
 		MustLoadFunc: &ConfigMustLoadFunc{
 			defaultHook: i.MustLoad,
+		},
+		PostLoadFunc: &ConfigPostLoadFunc{
+			defaultHook: i.PostLoad,
 		},
 	}
 }
@@ -720,4 +731,106 @@ func (c ConfigMustLoadFuncCall) Args() []interface{} {
 // invocation.
 func (c ConfigMustLoadFuncCall) Results() []interface{} {
 	return []interface{}{}
+}
+
+// ConfigPostLoadFunc describes the behavior when the PostLoad method of the
+// parent MockConfig instance is invoked.
+type ConfigPostLoadFunc struct {
+	defaultHook func(interface{}) error
+	hooks       []func(interface{}) error
+	history     []ConfigPostLoadFuncCall
+	mutex       sync.Mutex
+}
+
+// PostLoad delegates to the next hook function in the queue and stores the
+// parameter and result values of this invocation.
+func (m *MockConfig) PostLoad(v0 interface{}) error {
+	r0 := m.PostLoadFunc.nextHook()(v0)
+	m.PostLoadFunc.appendCall(ConfigPostLoadFuncCall{v0, r0})
+	return r0
+}
+
+// SetDefaultHook sets function that is called when the PostLoad method of
+// the parent MockConfig instance is invoked and the hook queue is empty.
+func (f *ConfigPostLoadFunc) SetDefaultHook(hook func(interface{}) error) {
+	f.defaultHook = hook
+}
+
+// PushHook adds a function to the end of hook queue. Each invocation of the
+// PostLoad method of the parent MockConfig instance invokes the hook at the
+// front of the queue and discards it. After the queue is empty, the default
+// hook function is invoked for any future action.
+func (f *ConfigPostLoadFunc) PushHook(hook func(interface{}) error) {
+	f.mutex.Lock()
+	f.hooks = append(f.hooks, hook)
+	f.mutex.Unlock()
+}
+
+// SetDefaultReturn calls SetDefaultDefaultHook with a function that returns
+// the given values.
+func (f *ConfigPostLoadFunc) SetDefaultReturn(r0 error) {
+	f.SetDefaultHook(func(interface{}) error {
+		return r0
+	})
+}
+
+// PushReturn calls PushDefaultHook with a function that returns the given
+// values.
+func (f *ConfigPostLoadFunc) PushReturn(r0 error) {
+	f.PushHook(func(interface{}) error {
+		return r0
+	})
+}
+
+func (f *ConfigPostLoadFunc) nextHook() func(interface{}) error {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	if len(f.hooks) == 0 {
+		return f.defaultHook
+	}
+
+	hook := f.hooks[0]
+	f.hooks = f.hooks[1:]
+	return hook
+}
+
+func (f *ConfigPostLoadFunc) appendCall(r0 ConfigPostLoadFuncCall) {
+	f.mutex.Lock()
+	f.history = append(f.history, r0)
+	f.mutex.Unlock()
+}
+
+// History returns a sequence of ConfigPostLoadFuncCall objects describing
+// the invocations of this function.
+func (f *ConfigPostLoadFunc) History() []ConfigPostLoadFuncCall {
+	f.mutex.Lock()
+	history := make([]ConfigPostLoadFuncCall, len(f.history))
+	copy(history, f.history)
+	f.mutex.Unlock()
+
+	return history
+}
+
+// ConfigPostLoadFuncCall is an object that describes an invocation of
+// method PostLoad on an instance of MockConfig.
+type ConfigPostLoadFuncCall struct {
+	// Arg0 is the value of the 1st argument passed to this method
+	// invocation.
+	Arg0 interface{}
+	// Result0 is the value of the 1st result returned from this method
+	// invocation.
+	Result0 error
+}
+
+// Args returns an interface slice containing the arguments of this
+// invocation.
+func (c ConfigPostLoadFuncCall) Args() []interface{} {
+	return []interface{}{c.Arg0}
+}
+
+// Results returns an interface slice containing the results of this
+// invocation.
+func (c ConfigPostLoadFuncCall) Results() []interface{} {
+	return []interface{}{c.Result0}
 }
