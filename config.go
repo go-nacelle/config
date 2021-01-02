@@ -33,6 +33,23 @@ type Config interface {
 	// environment and config files when a value is missing or otherwise
 	// illegal.
 	Dump() map[string]string
+
+	// Describe returns a description of the struct relevant to the given
+	// config object. Field descriptions include the field name, the values
+	// of struct tags matching the configured sourcer, whether or not the
+	// field must be populated, and a default value (if any).
+	Describe(interface{}, ...TagModifier) (*StructDescription, error)
+}
+
+type StructDescription struct {
+	Fields []FieldDescription
+}
+
+type FieldDescription struct {
+	Name      string
+	Default   string
+	Required  bool
+	TagValues map[string]string
 }
 
 // PostLoadConfig is a marker interface for configuration objects
@@ -99,6 +116,15 @@ func (c *config) Assets() []string {
 
 func (c *config) Dump() map[string]string {
 	return c.sourcer.Dump()
+}
+
+func (c *config) Describe(target interface{}, modifiers ...TagModifier) (*StructDescription, error) {
+	config, err := ApplyTagModifiers(target, modifiers...)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.describe(config)
 }
 
 func (c *config) load(target interface{}) []error {
@@ -202,6 +228,57 @@ func (c *config) loadEnvField(
 	}
 
 	return nil
+}
+
+func (c *config) describe(target interface{}) (*StructDescription, error) {
+	objValue, objType, err := getIndirect(target)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.describeStruct(objValue, objType)
+}
+
+func (c *config) describeStruct(objValue reflect.Value, objType reflect.Type) (*StructDescription, error) {
+	if objType.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("invalid embedded type in configuration struct")
+	}
+
+	var fields []FieldDescription
+	for i := 0; i < objType.NumField(); i++ {
+		field := objValue.Field(i)
+		fieldType := objType.Field(i)
+		defaultTagValue := fieldType.Tag.Get(DefaultTag)
+		requiredTagValue := fieldType.Tag.Get(RequiredTag)
+
+		if fieldType.Anonymous {
+			definition, err := c.describeStruct(field, fieldType.Type)
+			if err != nil {
+				return nil, err
+			}
+
+			fields = append(fields, definition.Fields...)
+			continue
+		}
+
+		tagValues := map[string]string{}
+		for _, tag := range c.sourcer.Tags() {
+			if value := fieldType.Tag.Get(tag); value != "" {
+				tagValues[tag] = value
+			}
+		}
+
+		if len(tagValues) != 0 {
+			fields = append(fields, FieldDescription{
+				Name:      fieldType.Name,
+				Default:   defaultTagValue,
+				Required:  requiredTagValue != "",
+				TagValues: tagValues,
+			})
+		}
+	}
+
+	return &StructDescription{Fields: fields}, nil
 }
 
 //
