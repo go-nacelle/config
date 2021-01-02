@@ -15,10 +15,12 @@ type Config interface {
 	Init() error
 
 	// Load populates a configuration object. The given tag modifiers
-	// are applied to the configuration object pre-load. If the target
-	// value conforms to the PostLoadConfig interface, the PostLoad
-	// function may be called multiple times.
+	// are applied to the configuration object pre-load.
 	Load(interface{}, ...TagModifier) error
+
+	// Call the PostLoad method of the given target if it conforms to
+	// the PostLoadConfig interface.
+	PostLoad(interface{}) error
 
 	// MustInject calls Injects and panics on error.
 	MustLoad(interface{}, ...TagModifier)
@@ -75,15 +77,17 @@ func (c *config) Load(target interface{}, modifiers ...TagModifier) error {
 		for i := 0; i < len(sourceFields); i++ {
 			targetFields[i].Field.Set(sourceFields[i].Field)
 		}
-
-		if plc, ok := target.(PostLoadConfig); ok {
-			if err := plc.PostLoad(); err != nil {
-				errors = append(errors, err)
-			}
-		}
 	}
 
 	return loadError(errors)
+}
+
+func (c *config) PostLoad(target interface{}) error {
+	if plc, ok := target.(PostLoadConfig); ok {
+		return plc.PostLoad()
+	}
+
+	return nil
 }
 
 // MustLoad calls Load and panics on error.
