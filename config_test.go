@@ -124,12 +124,14 @@ func TestConfigPostLoadConfig(t *testing.T) {
 
 	chunk := &testPostLoadConfig{}
 	require.Nil(t, config.Load(chunk))
+	require.Nil(t, config.PostLoad(chunk))
 
 	config = NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "-4",
 	}))
 
-	assert.EqualError(t, config.Load(chunk), "failed to load config (X must be positive)")
+	assert.Nil(t, config.Load(chunk))
+	assert.EqualError(t, config.PostLoad(chunk), "X must be positive")
 }
 
 type testPostLoadConfig struct {
@@ -203,6 +205,7 @@ func TestConfigLoadPostLoadWithConversion(t *testing.T) {
 
 	chunk := &testPostLoadConversion{}
 	require.Nil(t, config.Load(chunk))
+	require.Nil(t, config.PostLoad(chunk))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
@@ -213,6 +216,7 @@ func TestConfigLoadPostLoadWithTags(t *testing.T) {
 
 	chunk := &testPostLoadConversion{}
 	require.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
+	require.Nil(t, config.PostLoad(chunk))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
@@ -277,7 +281,8 @@ func TestConfigEmbeddedConfigPostLoad(t *testing.T) {
 	}))
 
 	chunk := &testParentConfig{}
-	assert.EqualError(t, config.Load(chunk), "failed to load config (fields must be increasing)")
+	assert.Nil(t, config.Load(chunk))
+	assert.EqualError(t, config.PostLoad(chunk), "fields must be increasing")
 }
 
 type testParentConfig struct {

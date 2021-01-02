@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Split `Config.Load` into `Load` and `PostLoad` methods. [#7](https://github.com/go-nacelle/config/pull/7)
+
 ## [v1.2.1] - 2020-09-30
 
 ### Removed
