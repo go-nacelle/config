@@ -2,9 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `Describe` method to `Config` interface. [#8](https://github.com/go-nacelle/config/pull/8)
+
 ### Changed
 
-- Split `Config.Load` into `Load` and `PostLoad` methods. [#7](https://github.com/go-nacelle/config/pull/7)
+- Split `Load` method in the `Config` interface into `Load` and `PostLoad` methods. [#7](https://github.com/go-nacelle/config/pull/7)
 
 ## [v1.2.1] - 2020-09-30
 

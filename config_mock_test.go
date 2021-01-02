@@ -10,6 +10,9 @@ type MockConfig struct {
 	// AssetsFunc is an instance of a mock function object controlling the
 	// behavior of the method Assets.
 	AssetsFunc *ConfigAssetsFunc
+	// DescribeFunc is an instance of a mock function object controlling the
+	// behavior of the method Describe.
+	DescribeFunc *ConfigDescribeFunc
 	// DumpFunc is an instance of a mock function object controlling the
 	// behavior of the method Dump.
 	DumpFunc *ConfigDumpFunc
@@ -34,6 +37,11 @@ func NewMockConfig() *MockConfig {
 		AssetsFunc: &ConfigAssetsFunc{
 			defaultHook: func() []string {
 				return nil
+			},
+		},
+		DescribeFunc: &ConfigDescribeFunc{
+			defaultHook: func(interface{}, ...TagModifier) (*StructDescription, error) {
+				return nil, nil
 			},
 		},
 		DumpFunc: &ConfigDumpFunc{
@@ -70,6 +78,9 @@ func NewMockConfigFrom(i Config) *MockConfig {
 	return &MockConfig{
 		AssetsFunc: &ConfigAssetsFunc{
 			defaultHook: i.Assets,
+		},
+		DescribeFunc: &ConfigDescribeFunc{
+			defaultHook: i.Describe,
 		},
 		DumpFunc: &ConfigDumpFunc{
 			defaultHook: i.Dump,
@@ -186,6 +197,121 @@ func (c ConfigAssetsFuncCall) Args() []interface{} {
 // invocation.
 func (c ConfigAssetsFuncCall) Results() []interface{} {
 	return []interface{}{c.Result0}
+}
+
+// ConfigDescribeFunc describes the behavior when the Describe method of the
+// parent MockConfig instance is invoked.
+type ConfigDescribeFunc struct {
+	defaultHook func(interface{}, ...TagModifier) (*StructDescription, error)
+	hooks       []func(interface{}, ...TagModifier) (*StructDescription, error)
+	history     []ConfigDescribeFuncCall
+	mutex       sync.Mutex
+}
+
+// Describe delegates to the next hook function in the queue and stores the
+// parameter and result values of this invocation.
+func (m *MockConfig) Describe(v0 interface{}, v1 ...TagModifier) (*StructDescription, error) {
+	r0, r1 := m.DescribeFunc.nextHook()(v0, v1...)
+	m.DescribeFunc.appendCall(ConfigDescribeFuncCall{v0, v1, r0, r1})
+	return r0, r1
+}
+
+// SetDefaultHook sets function that is called when the Describe method of
+// the parent MockConfig instance is invoked and the hook queue is empty.
+func (f *ConfigDescribeFunc) SetDefaultHook(hook func(interface{}, ...TagModifier) (*StructDescription, error)) {
+	f.defaultHook = hook
+}
+
+// PushHook adds a function to the end of hook queue. Each invocation of the
+// Describe method of the parent MockConfig instance invokes the hook at the
+// front of the queue and discards it. After the queue is empty, the default
+// hook function is invoked for any future action.
+func (f *ConfigDescribeFunc) PushHook(hook func(interface{}, ...TagModifier) (*StructDescription, error)) {
+	f.mutex.Lock()
+	f.hooks = append(f.hooks, hook)
+	f.mutex.Unlock()
+}
+
+// SetDefaultReturn calls SetDefaultDefaultHook with a function that returns
+// the given values.
+func (f *ConfigDescribeFunc) SetDefaultReturn(r0 *StructDescription, r1 error) {
+	f.SetDefaultHook(func(interface{}, ...TagModifier) (*StructDescription, error) {
+		return r0, r1
+	})
+}
+
+// PushReturn calls PushDefaultHook with a function that returns the given
+// values.
+func (f *ConfigDescribeFunc) PushReturn(r0 *StructDescription, r1 error) {
+	f.PushHook(func(interface{}, ...TagModifier) (*StructDescription, error) {
+		return r0, r1
+	})
+}
+
+func (f *ConfigDescribeFunc) nextHook() func(interface{}, ...TagModifier) (*StructDescription, error) {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	if len(f.hooks) == 0 {
+		return f.defaultHook
+	}
+
+	hook := f.hooks[0]
+	f.hooks = f.hooks[1:]
+	return hook
+}
+
+func (f *ConfigDescribeFunc) appendCall(r0 ConfigDescribeFuncCall) {
+	f.mutex.Lock()
+	f.history = append(f.history, r0)
+	f.mutex.Unlock()
+}
+
+// History returns a sequence of ConfigDescribeFuncCall objects describing
+// the invocations of this function.
+func (f *ConfigDescribeFunc) History() []ConfigDescribeFuncCall {
+	f.mutex.Lock()
+	history := make([]ConfigDescribeFuncCall, len(f.history))
+	copy(history, f.history)
+	f.mutex.Unlock()
+
+	return history
+}
+
+// ConfigDescribeFuncCall is an object that describes an invocation of
+// method Describe on an instance of MockConfig.
+type ConfigDescribeFuncCall struct {
+	// Arg0 is the value of the 1st argument passed to this method
+	// invocation.
+	Arg0 interface{}
+	// Arg1 is a slice containing the values of the variadic arguments
+	// passed to this method invocation.
+	Arg1 []TagModifier
+	// Result0 is the value of the 1st result returned from this method
+	// invocation.
+	Result0 *StructDescription
+	// Result1 is the value of the 2nd result returned from this method
+	// invocation.
+	Result1 error
+}
+
+// Args returns an interface slice containing the arguments of this
+// invocation. The variadic slice argument is flattened in this array such
+// that one positional argument and three variadic arguments would result in
+// a slice of four, not two.
+func (c ConfigDescribeFuncCall) Args() []interface{} {
+	trailing := []interface{}{}
+	for _, val := range c.Arg1 {
+		trailing = append(trailing, val)
+	}
+
+	return append([]interface{}{c.Arg0}, trailing...)
+}
+
+// Results returns an interface slice containing the results of this
+// invocation.
+func (c ConfigDescribeFuncCall) Results() []interface{} {
+	return []interface{}{c.Result0, c.Result1}
 }
 
 // ConfigDumpFunc describes the behavior when the Dump method of the parent
