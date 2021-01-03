@@ -9,7 +9,7 @@
 ### Removed
 
 - Removed mocks package. [#9](https://github.com/go-nacelle/config/pull/9)
-- Removed `MustLoad` from `Config` interface. [#11](https://github.com/go-nacelle/config/pull/11)
+- Removed `MustLoad` from `Config` interface. [#10](https://github.com/go-nacelle/config/pull/10)
 
 ### Changed
 
