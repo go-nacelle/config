@@ -22,9 +22,6 @@ type Config interface {
 	// the PostLoadConfig interface.
 	PostLoad(interface{}) error
 
-	// MustInject calls Injects and panics on error.
-	MustLoad(interface{}, ...TagModifier)
-
 	// Assets returns a list of names of assets that compose the
 	// underlying sourcer. This can be a list of matched files that are
 	// read, or a token that denotes a fixed source.
@@ -105,13 +102,6 @@ func (c *config) PostLoad(target interface{}) error {
 	}
 
 	return nil
-}
-
-// MustLoad calls Load and panics on error.
-func (c *config) MustLoad(target interface{}, modifiers ...TagModifier) {
-	if err := c.Load(target, modifiers...); err != nil {
-		panic(err.Error())
-	}
 }
 
 func (c *config) Assets() []string {

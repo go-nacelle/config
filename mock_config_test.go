@@ -22,9 +22,6 @@ type MockConfig struct {
 	// LoadFunc is an instance of a mock function object controlling the
 	// behavior of the method Load.
 	LoadFunc *ConfigLoadFunc
-	// MustLoadFunc is an instance of a mock function object controlling the
-	// behavior of the method MustLoad.
-	MustLoadFunc *ConfigMustLoadFunc
 	// PostLoadFunc is an instance of a mock function object controlling the
 	// behavior of the method PostLoad.
 	PostLoadFunc *ConfigPostLoadFunc
@@ -59,11 +56,6 @@ func NewMockConfig() *MockConfig {
 				return nil
 			},
 		},
-		MustLoadFunc: &ConfigMustLoadFunc{
-			defaultHook: func(interface{}, ...TagModifier) {
-				return
-			},
-		},
 		PostLoadFunc: &ConfigPostLoadFunc{
 			defaultHook: func(interface{}) error {
 				return nil
@@ -90,9 +82,6 @@ func NewMockConfigFrom(i Config) *MockConfig {
 		},
 		LoadFunc: &ConfigLoadFunc{
 			defaultHook: i.Load,
-		},
-		MustLoadFunc: &ConfigMustLoadFunc{
-			defaultHook: i.MustLoad,
 		},
 		PostLoadFunc: &ConfigPostLoadFunc{
 			defaultHook: i.PostLoad,
@@ -622,115 +611,6 @@ func (c ConfigLoadFuncCall) Args() []interface{} {
 // invocation.
 func (c ConfigLoadFuncCall) Results() []interface{} {
 	return []interface{}{c.Result0}
-}
-
-// ConfigMustLoadFunc describes the behavior when the MustLoad method of the
-// parent MockConfig instance is invoked.
-type ConfigMustLoadFunc struct {
-	defaultHook func(interface{}, ...TagModifier)
-	hooks       []func(interface{}, ...TagModifier)
-	history     []ConfigMustLoadFuncCall
-	mutex       sync.Mutex
-}
-
-// MustLoad delegates to the next hook function in the queue and stores the
-// parameter and result values of this invocation.
-func (m *MockConfig) MustLoad(v0 interface{}, v1 ...TagModifier) {
-	m.MustLoadFunc.nextHook()(v0, v1...)
-	m.MustLoadFunc.appendCall(ConfigMustLoadFuncCall{v0, v1})
-	return
-}
-
-// SetDefaultHook sets function that is called when the MustLoad method of
-// the parent MockConfig instance is invoked and the hook queue is empty.
-func (f *ConfigMustLoadFunc) SetDefaultHook(hook func(interface{}, ...TagModifier)) {
-	f.defaultHook = hook
-}
-
-// PushHook adds a function to the end of hook queue. Each invocation of the
-// MustLoad method of the parent MockConfig instance invokes the hook at the
-// front of the queue and discards it. After the queue is empty, the default
-// hook function is invoked for any future action.
-func (f *ConfigMustLoadFunc) PushHook(hook func(interface{}, ...TagModifier)) {
-	f.mutex.Lock()
-	f.hooks = append(f.hooks, hook)
-	f.mutex.Unlock()
-}
-
-// SetDefaultReturn calls SetDefaultDefaultHook with a function that returns
-// the given values.
-func (f *ConfigMustLoadFunc) SetDefaultReturn() {
-	f.SetDefaultHook(func(interface{}, ...TagModifier) {
-		return
-	})
-}
-
-// PushReturn calls PushDefaultHook with a function that returns the given
-// values.
-func (f *ConfigMustLoadFunc) PushReturn() {
-	f.PushHook(func(interface{}, ...TagModifier) {
-		return
-	})
-}
-
-func (f *ConfigMustLoadFunc) nextHook() func(interface{}, ...TagModifier) {
-	f.mutex.Lock()
-	defer f.mutex.Unlock()
-
-	if len(f.hooks) == 0 {
-		return f.defaultHook
-	}
-
-	hook := f.hooks[0]
-	f.hooks = f.hooks[1:]
-	return hook
-}
-
-func (f *ConfigMustLoadFunc) appendCall(r0 ConfigMustLoadFuncCall) {
-	f.mutex.Lock()
-	f.history = append(f.history, r0)
-	f.mutex.Unlock()
-}
-
-// History returns a sequence of ConfigMustLoadFuncCall objects describing
-// the invocations of this function.
-func (f *ConfigMustLoadFunc) History() []ConfigMustLoadFuncCall {
-	f.mutex.Lock()
-	history := make([]ConfigMustLoadFuncCall, len(f.history))
-	copy(history, f.history)
-	f.mutex.Unlock()
-
-	return history
-}
-
-// ConfigMustLoadFuncCall is an object that describes an invocation of
-// method MustLoad on an instance of MockConfig.
-type ConfigMustLoadFuncCall struct {
-	// Arg0 is the value of the 1st argument passed to this method
-	// invocation.
-	Arg0 interface{}
-	// Arg1 is a slice containing the values of the variadic arguments
-	// passed to this method invocation.
-	Arg1 []TagModifier
-}
-
-// Args returns an interface slice containing the arguments of this
-// invocation. The variadic slice argument is flattened in this array such
-// that one positional argument and three variadic arguments would result in
-// a slice of four, not two.
-func (c ConfigMustLoadFuncCall) Args() []interface{} {
-	trailing := []interface{}{}
-	for _, val := range c.Arg1 {
-		trailing = append(trailing, val)
-	}
-
-	return append([]interface{}{c.Arg0}, trailing...)
-}
-
-// Results returns an interface slice containing the results of this
-// invocation.
-func (c ConfigMustLoadFuncCall) Results() []interface{} {
-	return []interface{}{}
 }
 
 // ConfigPostLoadFunc describes the behavior when the PostLoad method of the

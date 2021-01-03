@@ -47,12 +47,6 @@ func (c *loggingConfig) Load(target interface{}, modifiers ...TagModifier) error
 	return nil
 }
 
-func (c *loggingConfig) MustLoad(target interface{}, modifiers ...TagModifier) {
-	if err := c.Load(target, modifiers...); err != nil {
-		panic(err.Error())
-	}
-}
-
 func (c *loggingConfig) dumpSource() error {
 	chunk := map[string]interface{}{}
 	for key, value := range c.Config.Dump() {

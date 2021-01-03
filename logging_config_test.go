@@ -66,19 +66,3 @@ func TestLoggingConfigBadMaskTag(t *testing.T) {
 
 	assert.EqualError(t, lc.Load(chunk), "failed to serialize config (field 'X' has an invalid mask tag)")
 }
-
-func TestLoggingConfigMustLoadLogs(t *testing.T) {
-	type C struct {
-		X string   `env:"x"`
-		Y int      `env:"y"`
-		Z []string `env:"w" display:"Q"`
-	}
-
-	config := NewMockConfig()
-	logger := NewMockLogger()
-	lc := NewLoggingConfig(config, logger, nil)
-	chunk := &C{}
-
-	lc.MustLoad(chunk)
-	mockassert.CalledOnce(t, logger.PrintfFunc)
-}
