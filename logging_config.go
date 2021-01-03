@@ -15,41 +15,13 @@ type Logger interface {
 	Printf(format string, args ...interface{})
 }
 
-type loggingConfig struct {
-	Config
-	logger     Logger
-	maskedKeys []string
-}
+type nilLogger struct{}
 
-// NewLoggingConfig wraps a config object with logging. After each successful load,
-// the populated configuration object is serialized as fields and output at the info
-// level.
-func NewLoggingConfig(config Config, logger Logger, maskedKeys []string) Config {
-	return &loggingConfig{
-		Config:     config,
-		logger:     logger,
-		maskedKeys: maskedKeys,
-	}
-}
+func (nilLogger) Printf(format string, args ...interface{}) {}
 
-func (c *loggingConfig) Load(target interface{}, modifiers ...TagModifier) error {
-	if err := c.Config.Load(target, modifiers...); err != nil {
-		c.dumpSource()
-		return err
-	}
-
-	chunk, err := dumpChunk(target)
-	if err != nil {
-		return fmt.Errorf("failed to serialize config (%s)", err.Error())
-	}
-
-	c.logger.Printf("Config loaded: %s", normalizeChunk(chunk))
-	return nil
-}
-
-func (c *loggingConfig) dumpSource() error {
+func (c *config) dumpSource() error {
 	chunk := map[string]interface{}{}
-	for key, value := range c.Config.Dump() {
+	for key, value := range c.Dump() {
 		if c.isMasked(key) {
 			chunk[key] = "*****"
 		} else {
@@ -57,12 +29,12 @@ func (c *loggingConfig) dumpSource() error {
 		}
 	}
 
-	c.logger.Printf("Config source assets: %s", strings.Join(c.Config.Assets(), ", "))
+	c.logger.Printf("Config source assets: %s", strings.Join(c.Assets(), ", "))
 	c.logger.Printf("Config source contents: %s", normalizeChunk(chunk))
 	return nil
 }
 
-func (c *loggingConfig) isMasked(target string) bool {
+func (c *config) isMasked(target string) bool {
 	for _, key := range c.maskedKeys {
 		if strings.ToLower(key) == strings.ToLower(target) {
 			return true

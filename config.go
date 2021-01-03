@@ -60,15 +60,21 @@ type PostLoadConfig interface {
 }
 
 type config struct {
-	sourcer Sourcer
+	sourcer    Sourcer
+	logger     Logger
+	maskedKeys []string
 }
 
 var _ Config = &config{}
 
 // NewConfig creates a config loader with the given sourcer.
-func NewConfig(sourcer Sourcer) Config {
+func NewConfig(sourcer Sourcer, configs ...ConfigOptionsFunc) Config {
+	options := getConfigOptions(configs)
+
 	return &config{
-		sourcer: sourcer,
+		sourcer:    sourcer,
+		logger:     options.logger,
+		maskedKeys: options.maskedKeys,
 	}
 }
 
@@ -83,7 +89,6 @@ func (c *config) Load(target interface{}, modifiers ...TagModifier) error {
 	}
 
 	errors := c.load(config)
-
 	if len(errors) == 0 {
 		sourceFields, _ := getExportedFields(config)
 		targetFields, _ := getExportedFields(target)
@@ -93,7 +98,18 @@ func (c *config) Load(target interface{}, modifiers ...TagModifier) error {
 		}
 	}
 
-	return loadError(errors)
+	if err := loadError(errors); err != nil {
+		c.dumpSource()
+		return err
+	}
+
+	chunk, err := dumpChunk(target)
+	if err != nil {
+		return fmt.Errorf("failed to serialize config (%s)", err.Error())
+	}
+
+	c.logger.Printf("Config loaded: %s", normalizeChunk(chunk))
+	return nil
 }
 
 func (c *config) PostLoad(target interface{}) error {

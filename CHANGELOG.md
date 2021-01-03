@@ -5,11 +5,13 @@
 ### Added
 
 - Added `Describe` method to `Config` interface. [#8](https://github.com/go-nacelle/config/pull/8)
+- Added `WithLogger` and `WithMaskedKeys` to replace `NewLoggingConfig`. [#11](https://github.com/go-nacelle/config/pull/11)
 
 ### Removed
 
 - Removed mocks package. [#9](https://github.com/go-nacelle/config/pull/9)
 - Removed `MustLoad` from `Config` interface. [#10](https://github.com/go-nacelle/config/pull/10)
+- Removed `NewLoggingConfig`. [#11](https://github.com/go-nacelle/config/pull/11)
 
 ### Changed
 
