@@ -19,7 +19,7 @@ type nilLogger struct{}
 
 func (nilLogger) Printf(format string, args ...interface{}) {}
 
-func (c *config) dumpSource() error {
+func (c *Config) dumpSource() error {
 	chunk := map[string]interface{}{}
 	for key, value := range c.Dump() {
 		if c.isMasked(key) {
@@ -34,7 +34,7 @@ func (c *config) dumpSource() error {
 	return nil
 }
 
-func (c *config) isMasked(target string) bool {
+func (c *Config) isMasked(target string) bool {
 	for _, key := range c.maskedKeys {
 		if strings.ToLower(key) == strings.ToLower(target) {
 			return true
