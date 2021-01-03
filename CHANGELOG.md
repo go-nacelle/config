@@ -6,6 +6,10 @@
 
 - Added `Describe` method to `Config` interface. [#8](https://github.com/go-nacelle/config/pull/8)
 
+### Removed
+
+- Removed mocks package. [#9](https://github.com/go-nacelle/config/pull/9)
+
 ### Changed
 
 - Split `Load` method in the `Config` interface into `Load` and `PostLoad` methods. [#7](https://github.com/go-nacelle/config/pull/7)
