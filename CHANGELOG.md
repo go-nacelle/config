@@ -16,6 +16,7 @@
 ### Changed
 
 - Split `Load` method in the `Config` interface into `Load` and `PostLoad` methods. [#7](https://github.com/go-nacelle/config/pull/7)
+- The `Config` interface is now a struct with the same name and set of methods. [#12](https://github.com/go-nacelle/config/pull/12)
 
 ## [v1.2.1] - 2020-09-30
 
