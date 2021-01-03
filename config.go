@@ -7,39 +7,6 @@ import (
 	"strings"
 )
 
-// Config is a structure that can populate the exported fields of a
-// struct based on the value of the field `env` tags.
-type Config interface {
-	// Init prepares state required by the registered sourcer. This
-	// method should be called before calling any other method.
-	Init() error
-
-	// Load populates a configuration object. The given tag modifiers
-	// are applied to the configuration object pre-load.
-	Load(interface{}, ...TagModifier) error
-
-	// Call the PostLoad method of the given target if it conforms to
-	// the PostLoadConfig interface.
-	PostLoad(interface{}) error
-
-	// Assets returns a list of names of assets that compose the
-	// underlying sourcer. This can be a list of matched files that are
-	// read, or a token that denotes a fixed source.
-	Assets() []string
-
-	// Dump returns the full content of the underlying sourcer. This
-	// is used by the logging package to show the content of the
-	// environment and config files when a value is missing or otherwise
-	// illegal.
-	Dump() map[string]string
-
-	// Describe returns a description of the struct relevant to the given
-	// config object. Field descriptions include the field name, the values
-	// of struct tags matching the configured sourcer, whether or not the
-	// field must be populated, and a default value (if any).
-	Describe(interface{}, ...TagModifier) (*StructDescription, error)
-}
-
 type StructDescription struct {
 	Fields []FieldDescription
 }
@@ -59,30 +26,34 @@ type PostLoadConfig interface {
 	PostLoad() error
 }
 
-type config struct {
+// Config is a structure that can populate the exported fields of a
+// struct based on the value of the field `env` tags.
+type Config struct {
 	sourcer    Sourcer
 	logger     Logger
 	maskedKeys []string
 }
 
-var _ Config = &config{}
-
 // NewConfig creates a config loader with the given sourcer.
-func NewConfig(sourcer Sourcer, configs ...ConfigOptionsFunc) Config {
+func NewConfig(sourcer Sourcer, configs ...ConfigOptionsFunc) *Config {
 	options := getConfigOptions(configs)
 
-	return &config{
+	return &Config{
 		sourcer:    sourcer,
 		logger:     options.logger,
 		maskedKeys: options.maskedKeys,
 	}
 }
 
-func (c *config) Init() error {
+// Init prepares state required by the registered sourcer. This
+// method should be called before calling any other method.
+func (c *Config) Init() error {
 	return c.sourcer.Init()
 }
 
-func (c *config) Load(target interface{}, modifiers ...TagModifier) error {
+// Load populates a configuration object. The given tag modifiers
+// are applied to the configuration object pre-load.
+func (c *Config) Load(target interface{}, modifiers ...TagModifier) error {
 	config, err := ApplyTagModifiers(target, modifiers...)
 	if err != nil {
 		return err
@@ -112,7 +83,9 @@ func (c *config) Load(target interface{}, modifiers ...TagModifier) error {
 	return nil
 }
 
-func (c *config) PostLoad(target interface{}) error {
+// Call the PostLoad method of the given target if it conforms to
+// the PostLoadConfig interface.
+func (c *Config) PostLoad(target interface{}) error {
 	if plc, ok := target.(PostLoadConfig); ok {
 		return plc.PostLoad()
 	}
@@ -120,15 +93,26 @@ func (c *config) PostLoad(target interface{}) error {
 	return nil
 }
 
-func (c *config) Assets() []string {
+// Assets returns a list of names of assets that compose the
+// underlying sourcer. This can be a list of matched files that are
+// read, or a token that denotes a fixed source.
+func (c *Config) Assets() []string {
 	return c.sourcer.Assets()
 }
 
-func (c *config) Dump() map[string]string {
+// Dump returns the full content of the underlying sourcer. This
+// is used by the logging package to show the content of the
+// environment and config files when a value is missing or otherwise
+// illegal.
+func (c *Config) Dump() map[string]string {
 	return c.sourcer.Dump()
 }
 
-func (c *config) Describe(target interface{}, modifiers ...TagModifier) (*StructDescription, error) {
+// Describe returns a description of the struct relevant to the given
+// config object. Field descriptions include the field name, the values
+// of struct tags matching the configured sourcer, whether or not the
+// field must be populated, and a default value (if any).
+func (c *Config) Describe(target interface{}, modifiers ...TagModifier) (*StructDescription, error) {
 	config, err := ApplyTagModifiers(target, modifiers...)
 	if err != nil {
 		return nil, err
@@ -137,7 +121,7 @@ func (c *config) Describe(target interface{}, modifiers ...TagModifier) (*Struct
 	return c.describe(config)
 }
 
-func (c *config) load(target interface{}) []error {
+func (c *Config) load(target interface{}) []error {
 	objValue, objType, err := getIndirect(target)
 	if err != nil {
 		return []error{err}
@@ -146,7 +130,7 @@ func (c *config) load(target interface{}) []error {
 	return c.loadStruct(objValue, objType)
 }
 
-func (c *config) loadStruct(objValue reflect.Value, objType reflect.Type) []error {
+func (c *Config) loadStruct(objValue reflect.Value, objType reflect.Type) []error {
 	if objType.Kind() != reflect.Struct {
 		return []error{fmt.Errorf(
 			"invalid embedded type in configuration struct",
@@ -186,7 +170,7 @@ func (c *config) loadStruct(objValue reflect.Value, objType reflect.Type) []erro
 	return errors
 }
 
-func (c *config) loadEnvField(
+func (c *Config) loadEnvField(
 	fieldValue reflect.Value,
 	name string,
 	tagValues []string,
@@ -240,7 +224,7 @@ func (c *config) loadEnvField(
 	return nil
 }
 
-func (c *config) describe(target interface{}) (*StructDescription, error) {
+func (c *Config) describe(target interface{}) (*StructDescription, error) {
 	objValue, objType, err := getIndirect(target)
 	if err != nil {
 		return nil, err
@@ -249,7 +233,7 @@ func (c *config) describe(target interface{}) (*StructDescription, error) {
 	return c.describeStruct(objValue, objType)
 }
 
-func (c *config) describeStruct(objValue reflect.Value, objType reflect.Type) (*StructDescription, error) {
+func (c *Config) describeStruct(objValue reflect.Value, objType reflect.Type) (*StructDescription, error) {
 	if objType.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("invalid embedded type in configuration struct")
 	}
