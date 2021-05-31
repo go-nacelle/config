@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [v2.0.0] - 2021-05-31
+
 ### Added
 
 - Added `Describe` method to `Config` interface. [#8](https://github.com/go-nacelle/config/pull/8)
@@ -48,3 +52,4 @@
 [v1.1.0]: https://github.com/go-nacelle/config/compare/v1.0.0...v1.1.0
 [v1.2.0]: https://github.com/go-nacelle/config/compare/v1.1.0...v1.2.0
 [v1.2.1]: https://github.com/go-nacelle/config/compare/v1.2.0...v1.2.1
+[v2.0.0]: https://github.com/go-nacelle/config/compare/v1.2.1...v2.0.0
