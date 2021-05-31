@@ -2,8 +2,6 @@
 
 ## [Unreleased]
 
-Nothing yet.
-
 ## [v2.0.0] - 2021-05-31
 
 ### Added
@@ -47,7 +45,7 @@ Nothing yet.
 
 - Migrated from [efritz/zubrin](https://github.com/efritz/zubrin).
 
-[Unreleased]: https://github.com/go-nacelle/config/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/go-nacelle/config/compare/v2.0.0...HEAD
 [v1.0.0]: https://github.com/go-nacelle/config/releases/tag/v1.0.0
 [v1.1.0]: https://github.com/go-nacelle/config/compare/v1.0.0...v1.1.0
 [v1.2.0]: https://github.com/go-nacelle/config/compare/v1.1.0...v1.2.0
