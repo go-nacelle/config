@@ -19,7 +19,7 @@ func TestWithAndFromContext(t *testing.T) {
 		}))
 
 		ctx := context.Background()
-		ctx = WithContext(ctx, cfg)
+		ctx = WithConfig(ctx, cfg)
 
 		ctxCfg := FromContext(ctx)
 		require.NotNil(t, ctxCfg)
@@ -53,7 +53,7 @@ func TestLoadFromContext(t *testing.T) {
 		}))
 
 		ctx := context.Background()
-		ctx = WithContext(ctx, cfg)
+		ctx = WithConfig(ctx, cfg)
 
 		loadCfg := &TestConfig{}
 		err := LoadFromContext(ctx, loadCfg)
@@ -66,7 +66,7 @@ func TestLoadFromContext(t *testing.T) {
 		}))
 
 		ctx := context.Background()
-		ctx = WithContext(ctx, cfg)
+		ctx = WithConfig(ctx, cfg)
 
 		loadCfg := &TestConfig{}
 		err := LoadFromContext(ctx, loadCfg, NewEnvTagPrefixer("tag"))

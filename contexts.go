@@ -9,7 +9,7 @@ type configKeyType struct{}
 
 var configKey = configKeyType{}
 
-func WithContext(ctx context.Context, cfg *Config) context.Context {
+func WithConfig(ctx context.Context, cfg *Config) context.Context {
 	return context.WithValue(ctx, configKey, cfg)
 }
 
