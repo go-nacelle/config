@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v2.0.1] - 2022-10-10
+
+### Added
+
+- Added `WithConfig` and `FromContext`. [#15](https://github.com/go-nacelle/config/pull/15)
+
 ## [v2.0.0] - 2021-05-31
 
 ### Added
@@ -45,9 +51,10 @@
 
 - Migrated from [efritz/zubrin](https://github.com/efritz/zubrin).
 
-[Unreleased]: https://github.com/go-nacelle/config/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/go-nacelle/config/compare/v2.0.1...HEAD
 [v1.0.0]: https://github.com/go-nacelle/config/releases/tag/v1.0.0
 [v1.1.0]: https://github.com/go-nacelle/config/compare/v1.0.0...v1.1.0
 [v1.2.0]: https://github.com/go-nacelle/config/compare/v1.1.0...v1.2.0
 [v1.2.1]: https://github.com/go-nacelle/config/compare/v1.2.0...v1.2.1
 [v2.0.0]: https://github.com/go-nacelle/config/compare/v1.2.1...v2.0.0
+[v2.0.1]: https://github.com/go-nacelle/config/compare/v2.0.0...v2.0.1
