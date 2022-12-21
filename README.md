@@ -2,7 +2,9 @@
 
 # Configuration loading and validation for Nacelle
 
-[![PkgGoDev](https://pkg.go.dev/badge/badge/github.com/go-nacelle/config.svg)](https://pkg.go.dev/github.com/go-nacelle/config) [![CircleCI status](https://circleci.com/gh/go-nacelle/config.svg?style=svg)](https://circleci.com/gh/go-nacelle/config) [![Coverage status](https://coveralls.io/repos/github/go-nacelle/config/badge.svg?branch=master)](https://coveralls.io/github/go-nacelle/config?branch=master) ![Sonarcloud bugs count](https://sonarcloud.io/api/project_badges/measure?project=go-nacelle_config&metric=bugs) ![Sonarcloud vulnerabilities count](https://sonarcloud.io/api/project_badges/measure?project=go-nacelle_config&metric=vulnerabilities) ![Sonarcloud maintainability rating](https://sonarcloud.io/api/project_badges/measure?project=go-nacelle_config&metric=sqale_rating) ![Sonarcloud code smells count](https://sonarcloud.io/api/project_badges/measure?project=go-nacelle_config&metric=code_smells)
+[![PkgGoDev](https://pkg.go.dev/badge/badge/github.com/go-nacelle/config.svg)](https://pkg.go.dev/github.com/go-nacelle/config)
+[![Build status](https://github.com/go-nacelle/config/actions/workflows/test.yml/badge.svg)](https://github.com/go-nacelle/config/actions/workflows/test.yml)
+[![Latest release](https://img.shields.io/github/release/go-nacelle/config.svg)](https://github.com/go-nacelle/config/releases/)
 
 ---
 
