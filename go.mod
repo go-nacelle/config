@@ -1,4 +1,4 @@
-module github.com/go-nacelle/config/v2
+module github.com/go-nacelle/config/v3
 
 go 1.16
 
