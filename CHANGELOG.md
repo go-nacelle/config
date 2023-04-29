@@ -64,10 +64,11 @@
 
 - Migrated from [efritz/zubrin](https://github.com/efritz/zubrin).
 
-[Unreleased]: https://github.com/go-nacelle/config/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/go-nacelle/config/compare/v3.0.0...HEAD
 [v1.0.0]: https://github.com/go-nacelle/config/releases/tag/v1.0.0
 [v1.1.0]: https://github.com/go-nacelle/config/compare/v1.0.0...v1.1.0
 [v1.2.0]: https://github.com/go-nacelle/config/compare/v1.1.0...v1.2.0
 [v1.2.1]: https://github.com/go-nacelle/config/compare/v1.2.0...v1.2.1
 [v2.0.0]: https://github.com/go-nacelle/config/compare/v1.2.1...v2.0.0
 [v2.0.1]: https://github.com/go-nacelle/config/compare/v2.0.0...v2.0.1
+[v3.0.0]: https://github.com/go-nacelle/config/compare/v2.0.1...v3.0.0
