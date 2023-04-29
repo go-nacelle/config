@@ -4,9 +4,6 @@
 
 ## [v3.0.0] - 2023-04-29
 
-### Changed
-- Config struct `PostLoad` hooks are now automatically called by `Config.Load`. [#17](https://github.com/go-nacelle/config/pull/17)
-
 ### Added
 - Added `LoadError` to be returned when loading fails. [#17](https://github.com/go-nacelle/config/pull/17)
 - Added `PostLoadError` to be returned when a config struct's `PostLoad` hook fails. [#17](https://github.com/go-nacelle/config/pull/17)
@@ -14,6 +11,9 @@
 
 ### Removed
 - `Config.PostLoad` was removed from the public API. [#17](https://github.com/go-nacelle/config/pull/17)
+
+### Changed
+- Config struct `PostLoad` hooks are now automatically called by `Config.Load`. [#17](https://github.com/go-nacelle/config/pull/17)
 
 ## [v2.0.1] - 2022-10-10
 
