@@ -56,5 +56,9 @@ func TestLoggingConfigBadMaskTag(t *testing.T) {
 	lc := NewConfig(NewEnvSourcer(""), WithLogger(logger))
 
 	chunk := &C{}
-	assert.EqualError(t, lc.Load(chunk), "failed to serialize config (field 'X' has an invalid mask tag)")
+
+	var serErr *SerializeError
+	require.ErrorAs(t, lc.Load(chunk), &serErr)
+	assert.Equal(t, "X", serErr.FieldName)
+	assert.ErrorIs(t, serErr, ErrInvalidMaskTag)
 }

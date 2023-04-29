@@ -65,7 +65,7 @@ func dumpChunk(obj interface{}) (map[string]interface{}, error) {
 		if maskTagValue != "" {
 			val, err := strconv.ParseBool(maskTagValue)
 			if err != nil {
-				return nil, fmt.Errorf("field '%s' has an invalid mask tag", fieldType.Name)
+				return nil, newSerializeError(fieldType.Name, ErrInvalidMaskTag)
 			}
 
 			if val {
