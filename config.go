@@ -67,25 +67,28 @@ func (c *Config) Load(target interface{}, modifiers ...TagModifier) error {
 		for i := 0; i < len(sourceFields); i++ {
 			targetFields[i].Field.Set(sourceFields[i].Field)
 		}
-	}
-
-	if err := loadError(errors); err != nil {
+	} else {
 		c.dumpSource()
-		return err
+		return newLoadError(errors)
 	}
 
 	chunk, err := dumpChunk(target)
 	if err != nil {
-		return fmt.Errorf("failed to serialize config (%s)", err.Error())
+		return fmt.Errorf("failed to serialize config: %w", err)
+	}
+
+	if err := c.postLoad(target); err != nil {
+		return newPostLoadError(err)
 	}
 
 	c.logger.Printf("Config loaded: %s", normalizeChunk(chunk))
+
 	return nil
 }
 
 // Call the PostLoad method of the given target if it conforms to
 // the PostLoadConfig interface.
-func (c *Config) PostLoad(target interface{}) error {
+func (c *Config) postLoad(target interface{}) error {
 	if plc, ok := target.(PostLoadConfig); ok {
 		return plc.PostLoad()
 	}
@@ -288,5 +291,5 @@ func loadError(errors []error) error {
 		messages = append(messages, err.Error())
 	}
 
-	return fmt.Errorf("failed to load config (%s)", strings.Join(messages, ", "))
+	return fmt.Errorf("failed to load config: (%s)", strings.Join(messages, ", "))
 }

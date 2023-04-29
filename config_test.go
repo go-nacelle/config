@@ -60,7 +60,10 @@ func TestConfigRequired(t *testing.T) {
 
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &C{}
-	assert.EqualError(t, config.Load(chunk), "failed to load config (no value supplied for field 'X')")
+	assert.EqualError(t,
+		config.Load(chunk),
+		"failed to load config: no value supplied for field 'X'",
+	)
 }
 
 func TestConfigRequiredBadTag(t *testing.T) {
@@ -70,7 +73,10 @@ func TestConfigRequiredBadTag(t *testing.T) {
 
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &C{}
-	assert.EqualError(t, config.Load(chunk), "failed to load config (field 'X' has an invalid required tag)")
+	assert.EqualError(t,
+		config.Load(chunk),
+		"failed to load config: field 'X' has an invalid required tag",
+	)
 }
 
 func TestConfigDefault(t *testing.T) {
@@ -101,10 +107,16 @@ func TestConfigBadType(t *testing.T) {
 	}))
 
 	chunk := &C{}
-	assert.EqualError(t, config.Load(chunk), fmt.Sprintf("failed to load config (%s)", strings.Join([]string{
-		"value supplied for field 'Y' cannot be coerced into the expected type",
-		"value supplied for field 'Z' cannot be coerced into the expected type",
-	}, ", ")))
+
+	var errLoad *LoadError
+	require.ErrorAs(t, config.Load(chunk), &errLoad)
+	assert.ElementsMatch(t,
+		errLoad.Errors,
+		[]error{
+			fmt.Errorf("value supplied for field 'Y' cannot be coerced into the expected type"),
+			fmt.Errorf("value supplied for field 'Z' cannot be coerced into the expected type"),
+		},
+	)
 }
 
 func TestConfigBadDefaultType(t *testing.T) {
@@ -114,7 +126,15 @@ func TestConfigBadDefaultType(t *testing.T) {
 
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &C{}
-	assert.EqualError(t, config.Load(chunk), "failed to load config (default value for field 'X' cannot be coerced into the expected type)")
+
+	var errLoad *LoadError
+	require.ErrorAs(t, config.Load(chunk), &errLoad)
+	assert.ElementsMatch(t,
+		errLoad.Errors,
+		[]error{
+			fmt.Errorf("default value for field 'X' cannot be coerced into the expected type"),
+		},
+	)
 }
 
 func TestConfigPostLoadConfig(t *testing.T) {
@@ -124,14 +144,17 @@ func TestConfigPostLoadConfig(t *testing.T) {
 
 	chunk := &testPostLoadConfig{}
 	require.Nil(t, config.Load(chunk))
-	require.Nil(t, config.PostLoad(chunk))
 
 	config = NewConfig(NewFakeSourcer("app", map[string]string{
 		"APP_X": "-4",
 	}))
 
-	assert.Nil(t, config.Load(chunk))
-	assert.EqualError(t, config.PostLoad(chunk), "X must be positive")
+	var postErr *PostLoadError
+	require.ErrorAs(t, config.Load(chunk), &postErr)
+	assert.EqualError(t,
+		postErr.Unwrap(),
+		"X must be positive",
+	)
 }
 
 type testPostLoadConfig struct {
@@ -153,7 +176,15 @@ func TestConfigUnsettableFields(t *testing.T) {
 
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &C{}
-	assert.EqualError(t, config.Load(chunk), "failed to load config (field 'x' can not be set)")
+
+	var errLoad *LoadError
+	require.ErrorAs(t, config.Load(chunk), &errLoad)
+	assert.ElementsMatch(t,
+		errLoad.Errors,
+		[]error{
+			fmt.Errorf("field 'x' can not be set"),
+		},
+	)
 }
 
 func TestConfigLoad(t *testing.T) {
@@ -205,7 +236,6 @@ func TestConfigLoadPostLoadWithConversion(t *testing.T) {
 
 	chunk := &testPostLoadConversion{}
 	require.Nil(t, config.Load(chunk))
-	require.Nil(t, config.PostLoad(chunk))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
@@ -216,7 +246,6 @@ func TestConfigLoadPostLoadWithTags(t *testing.T) {
 
 	chunk := &testPostLoadConversion{}
 	require.Nil(t, config.Load(chunk, NewEnvTagPrefixer("foo")))
-	require.Nil(t, config.PostLoad(chunk))
 	assert.Equal(t, time.Second*3, chunk.Duration)
 }
 
@@ -231,8 +260,32 @@ func (c *testPostLoadConversion) PostLoad() error {
 }
 
 func TestConfigBadConfigObjectTypes(t *testing.T) {
-	assert.EqualError(t, NewConfig(NewFakeSourcer("app", nil)).Load(nil), "failed to load config (configuration target is not a pointer to struct)")
-	assert.EqualError(t, NewConfig(NewFakeSourcer("app", nil)).Load("foo"), "failed to load config (configuration target is not a pointer to struct)")
+	t.Run("nil config object", func(t *testing.T) {
+		var errLoad *LoadError
+		require.ErrorAs(t,
+			NewConfig(NewFakeSourcer("app", nil)).Load(nil),
+			&errLoad,
+		)
+		assert.ElementsMatch(t,
+			errLoad.Errors,
+			[]error{
+				fmt.Errorf("configuration target is not a pointer to struct"),
+			},
+		)
+	})
+	t.Run("string config object", func(t *testing.T) {
+		var errLoad *LoadError
+		require.ErrorAs(t,
+			NewConfig(NewFakeSourcer("app", nil)).Load("foo"),
+			&errLoad,
+		)
+		assert.ElementsMatch(t,
+			errLoad.Errors,
+			[]error{
+				fmt.Errorf("configuration target is not a pointer to struct"),
+			},
+		)
+	})
 }
 
 func TestConfigEmbeddedConfig(t *testing.T) {
@@ -281,8 +334,13 @@ func TestConfigEmbeddedConfigPostLoad(t *testing.T) {
 	}))
 
 	chunk := &testParentConfig{}
-	assert.Nil(t, config.Load(chunk))
-	assert.EqualError(t, config.PostLoad(chunk), "fields must be increasing")
+
+	var postErr *PostLoadError
+	require.ErrorAs(t, config.Load(chunk), &postErr)
+	assert.EqualError(t,
+		postErr.Unwrap(),
+		"fields must be increasing",
+	)
 }
 
 type testParentConfig struct {
@@ -314,7 +372,15 @@ func TestConfigBadEmbeddedObjectType(t *testing.T) {
 
 	config := NewConfig(NewFakeSourcer("app", nil))
 	chunk := &C{}
-	assert.EqualError(t, config.Load(chunk), "failed to load config (invalid embedded type in configuration struct)")
+
+	var loadErr *LoadError
+	require.ErrorAs(t, config.Load(chunk), &loadErr)
+	assert.ElementsMatch(t,
+		loadErr.Errors,
+		[]error{
+			fmt.Errorf("invalid embedded type in configuration struct"),
+		},
+	)
 }
 
 //
