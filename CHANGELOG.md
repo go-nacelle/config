@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [v3.0.0] - 2023-04-29
+
+### Added
+- Added `LoadError` to be returned when loading fails. [#17](https://github.com/go-nacelle/config/pull/17)
+- Added `PostLoadError` to be returned when a config struct's `PostLoad` hook fails. [#17](https://github.com/go-nacelle/config/pull/17)
+- Added `SerializeError` to be returned when value serialization into a config struct field fails. [#17](https://github.com/go-nacelle/config/pull/17)
+
+### Removed
+- `Config.PostLoad` was removed from the public API. [#17](https://github.com/go-nacelle/config/pull/17)
+
+### Changed
+- Config struct `PostLoad` hooks are now automatically called by `Config.Load`. [#17](https://github.com/go-nacelle/config/pull/17)
+
 ## [v2.0.1] - 2022-10-10
 
 ### Added
@@ -51,10 +64,11 @@
 
 - Migrated from [efritz/zubrin](https://github.com/efritz/zubrin).
 
-[Unreleased]: https://github.com/go-nacelle/config/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/go-nacelle/config/compare/v3.0.0...HEAD
 [v1.0.0]: https://github.com/go-nacelle/config/releases/tag/v1.0.0
 [v1.1.0]: https://github.com/go-nacelle/config/compare/v1.0.0...v1.1.0
 [v1.2.0]: https://github.com/go-nacelle/config/compare/v1.1.0...v1.2.0
 [v1.2.1]: https://github.com/go-nacelle/config/compare/v1.2.0...v1.2.1
 [v2.0.0]: https://github.com/go-nacelle/config/compare/v1.2.1...v2.0.0
 [v2.0.1]: https://github.com/go-nacelle/config/compare/v2.0.0...v2.0.1
+[v3.0.0]: https://github.com/go-nacelle/config/compare/v2.0.1...v3.0.0
