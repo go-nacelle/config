@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [v3.1.0] - 2025-02-18
+
+### Added
+- Added `WithSourceDumpOnError` option for `Config` to dump source values on error. [#19](https://github.com/go-nacelle/config/pull/19)
+
+### Changed
+- Source values are no longer dumped by default when a config load error is encountered. [#19](https://github.com/go-nacelle/config/pull/19)
+
 ## [v3.0.0] - 2023-04-29
 
 ### Added
