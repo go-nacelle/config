@@ -32,6 +32,8 @@ type Config struct {
 	sourcer    Sourcer
 	logger     Logger
 	maskedKeys []string
+
+	sourceDumpOnErr bool
 }
 
 // NewConfig creates a config loader with the given sourcer.
@@ -42,6 +44,8 @@ func NewConfig(sourcer Sourcer, configs ...ConfigOptionsFunc) *Config {
 		sourcer:    sourcer,
 		logger:     options.logger,
 		maskedKeys: options.maskedKeys,
+
+		sourceDumpOnErr: options.sourceDumpOnErr,
 	}
 }
 
@@ -68,7 +72,9 @@ func (c *Config) Load(target interface{}, modifiers ...TagModifier) error {
 			targetFields[i].Field.Set(sourceFields[i].Field)
 		}
 	} else {
-		c.dumpSource()
+		if c.sourceDumpOnErr {
+			c.dumpSource()
+		}
 		return newLoadError(errors)
 	}
 
