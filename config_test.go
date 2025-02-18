@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	mockassert "github.com/derision-test/go-mockgen/testutil/assert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -206,6 +207,40 @@ func TestConfigLoad(t *testing.T) {
 	assert.Equal(t, "foo", chunk.X)
 	assert.Equal(t, 123, chunk.Y)
 	assert.Equal(t, []string{"bar", "baz", "bonk"}, chunk.Z)
+}
+
+func TestConfigLoadDumpOption(t *testing.T) {
+	t.Run("defaults to false", func(t *testing.T) {
+		logger := NewMockLogger()
+
+		c := NewConfig(
+			NewFakeSourcer("app", nil),
+			WithLogger(logger),
+		)
+
+		assert.Error(t, c.Load(nil))
+
+		mockassert.NotCalled(t, logger.PrintfFunc)
+	})
+	t.Run("can be turned on", func(t *testing.T) {
+		logger := NewMockLogger()
+
+		c := NewConfig(
+			NewFakeSourcer("app", nil),
+			WithSourceDumpOnError(true),
+			WithLogger(logger),
+		)
+
+		assert.Error(t, c.Load(nil))
+
+		assert.Equal(t,
+			[]LoggerPrintfFuncCall{
+				{Arg0: "Config source assets: %s", Arg1: []interface{}{""}},
+				{Arg0: "Config source contents: %s", Arg1: []interface{}{"<no values>"}},
+			},
+			logger.PrintfFunc.History(),
+		)
+	})
 }
 
 func TestConfigLoadIsomorphicType(t *testing.T) {
